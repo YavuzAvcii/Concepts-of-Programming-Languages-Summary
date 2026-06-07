@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Data Types Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #34495e;
+        }
+        p, li {
+            font-size: 1.05em;
+        }
+        .quiz-focus {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quiz-focus h4 {
+            margin-top: 0;
+            color: #856404;
+            display: flex;
+            align-items: center;
+        }
+        .quiz-focus h4::before {
+            content: '🎯 ';
+            margin-right: 8px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Chapter 6: Data Types</h1>
+    <p>A data type defines a collection of data values and a set of predefined operations on those values[cite: 30]. The contemporary concepts of data typing have evolved to provide flexible structures and abstract data types[cite: 33, 44].</p>
+
+    <h2>1. Primitive Data Types</h2>
+    <p>These are data types not defined in terms of other types[cite: 78].</p>
+    <ul>
+        <li><strong>Numeric:</strong> Integers are usually supported directly by hardware and use two's complement for negative numbers[cite: 87, 100]. Floating-point types model real numbers using fractions and exponents, usually following the IEEE 754 standard[cite: 106, 114, 116].</li>
+        <li><strong>Decimal:</strong> Store a fixed number of decimal digits, which is essential for business data processing (e.g., COBOL)[cite: 149, 150].</li>
+        <li><strong>Boolean:</strong> Represent true or false, often stored in a single byte for efficient access[cite: 163, 171].</li>
+        <li><strong>Character:</strong> Stored as numeric codes like ASCII (8-bit) or Unicode (16-bit or 32-bit)[cite: 174, 177, 183].</li>
+    </ul>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Float vs. Decimal</h4>
+        <p><strong>Question to expect:</strong> What are the advantages and disadvantages of decimal types compared to floating-point types?</p>
+        <ul>
+            <li><em>Advantage:</em> Decimal types can exactly represent decimal values, avoiding the loss of precision that occurs in floating-point representations[cite: 152, 153].</li>
+            <li><em>Disadvantage:</em> Decimal types have a restricted range because they do not use exponents, and their representation in memory is wasteful[cite: 154, 157].</li>
+        </ul>
+    </div>
+
+    <h2>2. Character String Types</h2>
+    <p>Values consist of sequences of characters[cite: 187]. They can be treated as arrays of characters (like in C/C++) or as primitive types (like in Python)[cite: 204, 231].</p>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: String Length Bindings</h4>
+        <p><strong>Question to expect:</strong> Describe the three string length options.</p>
+        <ul>
+            <li><em>Static length:</em> Set when created and immutable (e.g., Java's String class, Python)[cite: 266, 267].</li>
+            <li><em>Limited dynamic length:</em> Can vary up to a declared maximum length (e.g., C-style strings using a null terminator)[cite: 268, 270].</li>
+            <li><em>Dynamic length:</em> Can vary with no maximum, offering flexibility but requiring overhead for dynamic memory allocation (e.g., JavaScript, Perl)[cite: 271, 272].</li>
+        </ul>
+    </div>
+
+    <h2>3. Enumeration & Subrange Types</h2>
+    <p>An enumeration type defines all possible values as named constants[cite: 326].</p>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Enumeration Safety</h4>
+        <p><strong>Question to expect:</strong> How do C# or Java enumeration types improve reliability compared to C/C++?</p>
+        <ul>
+            <li>In C#, enumerations are not coerced to integers, restricting operations to those that make sense (e.g., you cannot do arithmetic on them)[cite: 377, 378].</li>
+            <li>They restrict values to the defined range, preventing assignment of invalid values[cite: 379, 399].</li>
+            <li>C and C++ treat them as integers (or coerce them), which defeats type checking and allows meaningless operations[cite: 356, 402].</li>
+        </ul>
+    </div>
+
+    <h2>4. Array Types</h2>
+    <p>An array is a homogeneous aggregate of data elements where individuals are identified by their position (indices)[cite: 410].</p>
+    <ul>
+        <li><strong>Rectangular arrays:</strong> All rows have the same number of elements[cite: 601].</li>
+        <li><strong>Jagged arrays:</strong> Arrays of arrays, where row lengths can differ[cite: 603, 606].</li>
+        <li><strong>Slices:</strong> Mechanisms for referencing a substructure of an array as a unit[cite: 617, 620].</li>
+    </ul>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Array Subscript Binding Categories</h4>
+        <p><strong>Question to expect:</strong> Define the four categories of arrays based on subscript bindings and storage allocation.</p>
+        <ul>
+            <li><em>Static:</em> Subscript ranges and storage are fixed before run time. Efficient but inflexible[cite: 480, 481, 482].</li>
+            <li><em>Fixed stack-dynamic:</em> Subscript ranges are statically bound, but allocation happens at declaration elaboration during run time (space efficient)[cite: 483, 484].</li>
+            <li><em>Fixed heap-dynamic:</em> Subscript ranges and storage are bound upon user request from the heap, then remain fixed[cite: 488, 489].</li>
+            <li><em>Heap-dynamic:</em> Binding of ranges and storage can change any number of times during execution (most flexible, least efficient)[cite: 492, 493, 494].</li>
+        </ul>
+    </div>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Array Implementation</h4>
+        <p><strong>Question to expect:</strong> Define row major order and column major order.</p>
+        <ul>
+            <li>In <em>row major order</em>, elements of the first row are stored contiguously, followed by the second row, etc.[cite: 684, 685].</li>
+            <li>Array access requires an <em>access function</em> that computes memory addresses using multiplication and addition[cite: 657, 709].</li>
+        </ul>
+    </div>
+
+    <h2>5. Associative Arrays, Records, and Tuples</h2>
+    <ul>
+        <li><strong>Associative Arrays:</strong> An unordered collection of elements indexed by keys (e.g., hashes in Perl or dictionaries in Python)[cite: 743, 752, 776]. Ideal for paired data and fast lookups[cite: 786, 787].</li>
+        <li><strong>Records:</strong> A heterogeneous aggregate where elements (fields) are identified by names and accessed via offsets[cite: 799, 879].</li>
+        <li><strong>Tuples:</strong> Similar to records but elements are not named[cite: 896]. Often used in Python and functional languages to return multiple values from functions[cite: 928].</li>
+    </ul>
+
+    <h2>6. Union Types</h2>
+    <p>A union stores different type values at different times in the same memory location[cite: 1020].</p>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Free vs. Discriminated Unions</h4>
+        <p><strong>Question to expect:</strong> What is the difference between a free union and a discriminated union?</p>
+        <ul>
+            <li><em>Free unions</em> (used in C/C++) do not include a type indicator and bypass type checking, making them highly unsafe[cite: 1032, 1034].</li>
+            <li><em>Discriminated unions</em> (used in F#, ML) require a type indicator (tag or discriminant) for type checking, ensuring safety[cite: 1046, 1047].</li>
+        </ul>
+    </div>
+
+    <h2>7. Pointers and Reference Types</h2>
+    <p>Pointers store memory addresses and are used for indirect addressing and dynamic heap management[cite: 1093, 1095, 1096]. Reference types refer to an object rather than an address, restricting dangerous arithmetic operations (used heavily in Java/C#)[cite: 1245, 1246, 1264].</p>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Pointer Problems</h4>
+        <p><strong>Question to expect:</strong> What are the two common problems with pointers?</p>
+        <ul>
+            <li><em>Dangling pointers:</em> A pointer that contains the address of a heap-dynamic variable that has already been deallocated[cite: 1158].</li>
+            <li><em>Lost heap-dynamic variables (Memory Leaks):</em> A dynamic variable that is no longer accessible because all pointers to it have been reassigned or destroyed[cite: 1188, 1193].</li>
+        </ul>
+        <p><strong>Follow-up:</strong> What are the solutions to dangling pointers?</p>
+        <ul>
+            <li><em>Tombstones:</em> An extra cell that acts as an intermediary; it is set to nil upon deallocation[cite: 1303, 1305].</li>
+            <li><em>Locks-and-keys:</em> Pointers must carry a key that matches a lock value on the dynamic variable; deallocation changes the lock, invalidating old keys[cite: 1311, 1313, 1319].</li>
+        </ul>
+    </div>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Garbage Collection</h4>
+        <p><strong>Question to expect:</strong> Describe the eager and lazy approaches to heap storage recovery.</p>
+        <ul>
+            <li><em>Reference Counters (Eager/Incremental):</em> Every cell maintains a counter of pointers pointing to it. When the count drops to zero, the cell is reclaimed immediately. It struggles with circular references and adds execution overhead[cite: 1347, 1349, 1357].</li>
+            <li><em>Mark-Sweep (Lazy):</em> Collects garbage only when memory runs out. It traces all active pointers, marks reachable cells, and sweeps away unmarked cells into the available space list. It causes execution delays when running[cite: 1362, 1363, 1369, 1370].</li>
+        </ul>
+    </div>
+
+    <h2>8. Type Checking, Strong Typing, and Equivalence</h2>
+    <p>Type checking ensures operands are of compatible types[cite: 1474]. Automatic conversion of types is called coercion[cite: 1476].</p>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Strong Typing</h4>
+        <p><strong>Question to expect:</strong> Define a strongly typed language and explain why C/C++ are not strongly typed.</p>
+        <ul>
+            <li>A programming language is strongly typed if type errors are <em>always</em> detected[cite: 1494].</li>
+            <li>C and C++ are not strongly typed because they include free union types, which allow values to bypass type checking[cite: 1498].</li>
+            <li><em>Note:</em> Coercion weakens the value of strong typing by hiding logical errors that are converted automatically rather than flagged[cite: 1507, 1511].</li>
+        </ul>
+    </div>
+    <div class="quiz-focus">
+        <h4>Quiz Focus: Type Equivalence</h4>
+        <p><strong>Question to expect:</strong> What is the difference between name type equivalence and structure type equivalence?</p>
+        <ul>
+            <li><em>Name type equivalence:</em> Variables have equivalent types if they are defined in the same declaration or use the exact same type name. It is highly restrictive but easy to implement[cite: 1531, 1535].</li>
+            <li><em>Structure type equivalence:</em> Variables have equivalent types if their internal structures are identical. It is flexible but difficult to implement and risks confusing conceptually different types that happen to share a structure[cite: 1532, 1548, 1555].</li>
+        </ul>
+    </div>
+
+</body>
+</html>

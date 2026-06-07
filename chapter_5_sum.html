@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 5 — Names, Bindings & Scopes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --accent: #c0392b;
+    --accent2: #2c6e7f;
+    --muted: #7a7060;
+    --rule: #d4c9b0;
+    --code-bg: #1a1a2e;
+    --code-fg: #a8d8ea;
+    --highlight: #fff3cd;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,.03) 40px,
+      rgba(255,255,255,.03) 41px
+    );
+  }
+  .header-inner { max-width: 860px; margin: 0 auto; position: relative; }
+  .chapter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .6rem;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    line-height: 1.15;
+    color: #fff;
+  }
+  header h1 span { color: var(--accent); }
+  .header-sub {
+    margin-top: .8rem;
+    color: #aaa;
+    font-size: .9rem;
+    font-weight: 300;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--ink);
+    border-top: 1px solid #333;
+    padding: .6rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav ul {
+    max-width: 860px;
+    margin: 0 auto;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem .8rem;
+  }
+  nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: #bbb;
+    text-decoration: none;
+    letter-spacing: .05em;
+    transition: color .2s;
+  }
+  nav a:hover { color: var(--accent); }
+
+  /* ── MAIN ── */
+  main { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 3.5rem;
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: .8rem;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: .4rem;
+    margin-bottom: 1.4rem;
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: .08em;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  p { margin-bottom: .9rem; color: #2a2520; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(44,110,127,.07);
+    padding: .7rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 4px 4px 0;
+    font-size: .9rem;
+  }
+  .callout strong { color: var(--accent2); }
+
+  /* ── CODE ── */
+  code, pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1rem 0;
+    line-height: 1.6;
+  }
+  code {
+    background: rgba(0,0,0,.08);
+    padding: .1em .35em;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+  pre code { background: none; color: var(--code-fg); padding: 0; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 1.2rem 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .88rem;
+  }
+  th {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .6rem .8rem;
+    text-align: left;
+  }
+  td {
+    padding: .55rem .8rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(0,0,0,.03); }
+  tr:hover td { background: var(--highlight); }
+
+  /* advantage / disadvantage pill */
+  .tag {
+    display: inline-block;
+    font-size: .68rem;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: .1em .5em;
+    border-radius: 3px;
+    margin: 2px 2px 2px 0;
+  }
+  .tag-good { background: #d4edda; color: #155724; }
+  .tag-bad  { background: #f8d7da; color: #721c24; }
+
+  /* ── DEFINITION LIST ── */
+  .defs { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 1rem 0; }
+  .defs dt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--accent2);
+    padding-top: .1rem;
+  }
+  .defs dd { border-bottom: 1px solid var(--rule); padding-bottom: .3rem; }
+
+  /* ── QUIZ ── */
+  .qa-list { list-style: none; counter-reset: qa; }
+  .qa-list > li {
+    counter-increment: qa;
+    margin-bottom: 1.6rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .question {
+    background: var(--ink);
+    color: #fff;
+    padding: .65rem 1rem;
+    font-weight: 500;
+    font-size: .9rem;
+    display: flex;
+    gap: .7rem;
+    align-items: baseline;
+  }
+  .question::before {
+    content: "Q" counter(qa);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .answer {
+    padding: .8rem 1rem;
+    background: #fff;
+    font-size: .88rem;
+    line-height: 1.65;
+    display: none;
+  }
+  .answer.open { display: block; }
+  .toggle-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: .35rem;
+    background: #f0ebe0;
+    border: none;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+    transition: background .2s;
+  }
+  .toggle-btn:hover { background: var(--rule); }
+
+  #toggle-all-btn {
+    margin-bottom: 1.5rem;
+    padding: .5rem 1.2rem;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .78rem;
+    letter-spacing: .08em;
+    border-radius: 4px;
+    transition: background .2s;
+  }
+  #toggle-all-btn:hover { background: var(--accent); }
+
+  /* ── SCOPE DIAGRAM ── */
+  .scope-diagram {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem;
+    line-height: 1.9;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1.2rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+    white-space: pre;
+  }
+  .scope-diagram .bracket { color: #f9ca24; }
+  .scope-diagram .varname { color: #6ab04c; }
+  .scope-diagram .comment { color: #888; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="chapter-label">Concepts of Programming Languages · Chapter 5</div>
+    <h1>Names, Bindings,<br><span>&amp; Scopes</span></h1>
+    <p class="header-sub">Exam Study Guide — Variables, Binding Times, Storage Classes, Static vs. Dynamic Scope</p>
+  </div>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#names">5.2 Names</a></li>
+    <li><a href="#variables">5.3 Variables</a></li>
+    <li><a href="#binding">5.4 Binding</a></li>
+    <li><a href="#storage">5.4.3 Storage</a></li>
+    <li><a href="#scope">5.5 Scope</a></li>
+    <li><a href="#blocks">5.5.2 Blocks</a></li>
+    <li><a href="#dynamic">5.5.6 Dynamic Scope</a></li>
+    <li><a href="#refenv">5.7 Ref. Env.</a></li>
+    <li><a href="#constants">5.8 Constants</a></li>
+    <li><a href="#review">Review Q&amp;A</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- 5.2 NAMES -->
+<section class="section" id="names">
+  <div class="section-header">
+    <span class="section-num">§ 5.2</span>
+    <h2 class="section-title">Names</h2>
+  </div>
+  <p>A <strong>name</strong> (identifier) is a string of characters used to identify a program entity. Key design issues are <em>case sensitivity</em> and whether special words are <em>reserved words</em> or <em>keywords</em>.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Language</th><th>Name Rules</th><th>Case Sensitive?</th><th>Special Prefix</th></tr></thead>
+      <tbody>
+        <tr><td>C99</td><td>First 63 chars significant (internal); 31 (external)</td><td>Yes</td><td>—</td></tr>
+        <tr><td>Java / C#</td><td>No length limit, all chars significant</td><td>Yes</td><td>—</td></tr>
+        <tr><td>PHP</td><td>Variables must start with <code>$</code></td><td>Yes</td><td><code>$</code></td></tr>
+        <tr><td>Perl</td><td><code>$</code> scalar, <code>@</code> array, <code>%</code> hash — creates separate namespaces</td><td>Yes</td><td><code>$ @ %</code></td></tr>
+        <tr><td>Ruby</td><td><code>@</code> instance var, <code>@@</code> class var</td><td>Yes</td><td><code>@ @@</code></td></tr>
+        <tr><td>Fortran</td><td>Up to 6 chars (Fortran I); keywords only (not reserved)</td><td>No</td><td>—</td></tr>
+        <tr><td>COBOL</td><td>300 reserved words</td><td>No</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Reserved word</strong> — cannot be redefined by the programmer.<br>
+    <strong>Keyword</strong> — has special meaning only in certain contexts; can be redefined (e.g. Fortran).
+  </div>
+</section>
+
+<!-- 5.3 VARIABLES -->
+<section class="section" id="variables">
+  <div class="section-header">
+    <span class="section-num">§ 5.3</span>
+    <h2 class="section-title">Variables — the Sextuple</h2>
+  </div>
+  <p>A variable is fully described by six attributes:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Attribute</th><th>Description</th><th>Also Called</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Name</strong></td><td>Identifier used in source code</td><td>—</td></tr>
+        <tr><td><strong>Address</strong></td><td>Machine memory cell it is bound to</td><td>l-value</td></tr>
+        <tr><td><strong>Value</strong></td><td>Contents of that memory cell</td><td>r-value</td></tr>
+        <tr><td><strong>Type</strong></td><td>Determines value range &amp; valid operations</td><td>—</td></tr>
+        <tr><td><strong>Lifetime</strong></td><td>Time during which variable is bound to storage</td><td>—</td></tr>
+        <tr><td><strong>Scope</strong></td><td>Range of statements in which variable is visible</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Alias</strong>: two or more variable names bound to the <em>same memory address</em>. Harmful to readability and program verification. Created via pointer/reference assignment, unions (C/C++), or subprogram parameters.
+  </div>
+</section>
+
+<!-- 5.4 BINDING -->
+<section class="section" id="binding">
+  <div class="section-header">
+    <span class="section-num">§ 5.4</span>
+    <h2 class="section-title">Binding &amp; Binding Times</h2>
+  </div>
+  <p>A <strong>binding</strong> is an association between an entity and an attribute. The moment this association is established is the <strong>binding time</strong>.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Binding Time</th><th>When?</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Language design time</td><td>Before any code is written</td><td><code>*</code> bound to multiplication</td></tr>
+        <tr><td>Language implementation time</td><td>When the compiler/interpreter is built</td><td><code>int</code> range of values</td></tr>
+        <tr><td>Compile time</td><td>When source is compiled</td><td>Variable type in Java</td></tr>
+        <tr><td>Link time</td><td>When object files are linked</td><td>Library call bound to code</td></tr>
+        <tr><td>Load time</td><td>When program is loaded into memory</td><td>Static variable address</td></tr>
+        <tr><td>Run time</td><td>During execution</td><td>Variable value; heap allocation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>Static binding</strong>: occurs before runtime and does not change. <strong>Dynamic binding</strong>: occurs at runtime or can change during execution.</p>
+
+  <h3 style="margin:1.2rem 0 .5rem; font-family:'IBM Plex Mono',monospace; font-size:.9rem; color:var(--accent2);">Type Binding</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>How</th><th>Languages</th><th>Pros / Cons</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Explicit static declaration</td>
+          <td>Programmer writes type in declaration</td>
+          <td>C, Java, C++, C#</td>
+          <td><span class="tag tag-good">+reliable</span> <span class="tag tag-good">+fast</span></td>
+        </tr>
+        <tr>
+          <td>Implicit static (naming convention)</td>
+          <td>Name form implies type</td>
+          <td>Perl (<code>$@%</code>), Fortran</td>
+          <td><span class="tag tag-good">+convenient</span> <span class="tag tag-bad">-error-prone</span></td>
+        </tr>
+        <tr>
+          <td>Type inference</td>
+          <td>Compiler infers type from initial value</td>
+          <td>C# <code>var</code>, Swift, ML, Haskell, F#</td>
+          <td><span class="tag tag-good">+concise</span> <span class="tag tag-good">+still static</span></td>
+        </tr>
+        <tr>
+          <td>Dynamic type binding</td>
+          <td>Type assigned when value is assigned</td>
+          <td>Python, Ruby, JavaScript, PHP</td>
+          <td><span class="tag tag-good">+flexible</span> <span class="tag tag-bad">-less reliable</span> <span class="tag tag-bad">-slower</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 5.4.3 STORAGE CLASSES -->
+<section class="section" id="storage">
+  <div class="section-header">
+    <span class="section-num">§ 5.4.3</span>
+    <h2 class="section-title">Storage Bindings &amp; Variable Lifetime</h2>
+  </div>
+  <p>The <strong>lifetime</strong> of a variable is the time between when it is bound to storage and when it is unbound. Four categories:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Allocation</th><th>Deallocation</th><th>Languages</th><th>Advantages</th><th>Disadvantages</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Static</strong></td>
+          <td>Before execution begins</td>
+          <td>After execution ends</td>
+          <td>Global vars (C/C++/Java), <code>static</code> locals in C/C++</td>
+          <td><span class="tag tag-good">+direct addressing</span> <span class="tag tag-good">+history-sensitive</span></td>
+          <td><span class="tag tag-bad">-no recursion</span> <span class="tag tag-bad">-no storage sharing</span></td>
+        </tr>
+        <tr>
+          <td><strong>Stack-dynamic</strong></td>
+          <td>At declaration elaboration (subprogram call)</td>
+          <td>When subprogram returns</td>
+          <td>Local vars in Java, C++, C# methods</td>
+          <td><span class="tag tag-good">+supports recursion</span> <span class="tag tag-good">+shared stack space</span></td>
+          <td><span class="tag tag-bad">-not history-sensitive</span> <span class="tag tag-bad">-indirect addressing overhead</span></td>
+        </tr>
+        <tr>
+          <td><strong>Explicit heap-dynamic</strong></td>
+          <td>By explicit programmer instruction (<code>new</code>)</td>
+          <td>By <code>delete</code> or GC</td>
+          <td>C++ (<code>new</code>/<code>delete</code>), Java objects, C# objects</td>
+          <td><span class="tag tag-good">+dynamic structures (linked lists, trees)</span></td>
+          <td><span class="tag tag-bad">-complex management</span> <span class="tag tag-bad">-pointer errors</span></td>
+        </tr>
+        <tr>
+          <td><strong>Implicit heap-dynamic</strong></td>
+          <td>On assignment</td>
+          <td>By GC</td>
+          <td>JavaScript, Python lists assigned dynamically</td>
+          <td><span class="tag tag-good">+maximum flexibility</span></td>
+          <td><span class="tag tag-bad">-run-time overhead</span> <span class="tag tag-bad">-less error detection</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code>// C++ — all four categories in one example
+int global_x = 0;               // static (global)
+
+void demo() {
+    static int call_count = 0;  // static (local)
+    int local_y = 5;            // stack-dynamic
+    int* heap_z = new int(10);  // explicit heap-dynamic
+    delete heap_z;
+}
+
+// JavaScript — implicit heap-dynamic
+highs = [74, 84, 86, 90];       // bound to array type on assignment</code></pre>
+</section>
+
+<!-- 5.5 SCOPE -->
+<section class="section" id="scope">
+  <div class="section-header">
+    <span class="section-num">§ 5.5</span>
+    <h2 class="section-title">Scope</h2>
+  </div>
+  <p>The <strong>scope</strong> of a variable is the range of program statements in which it is <em>visible</em> (can be referenced or assigned).</p>
+
+  <div class="defs">
+    <dt>local</dt><dd>Declared in the current program unit or block.</dd>
+    <dt>nonlocal</dt><dd>Visible but declared in an outer unit.</dd>
+    <dt>global</dt><dd>Special nonlocal: defined outside all functions/subprograms.</dd>
+  </div>
+
+  <h3 style="margin:1.2rem 0 .5rem; font-family:'IBM Plex Mono',monospace; font-size:.9rem; color:var(--accent2);">Static (Lexical) Scoping</h3>
+  <p>Introduced by ALGOL 60. Scope is determined from the <em>text</em> of the program — before execution. To resolve a nonlocal variable, search proceeds outward through <strong>static ancestors</strong> (enclosing subprograms).</p>
+  <p><strong>Languages with nested subprograms:</strong> Ada, JavaScript, Python, F#, Common Lisp, Scheme, Fortran 2003+</p>
+  <p><strong>Languages without nested subprograms (C-based):</strong> C, C++, Java, C#</p>
+
+  <pre><code>function big() {
+    var x = 3;              // big's x
+    function sub1() {
+        var x = 7;          // sub1's own x (hides big's x)
+        sub2();
+    }
+    function sub2() {
+        var y = x;          // resolves to big's x = 3
+    }                       // (sub1's x is NOT a static ancestor of sub2)
+    sub1();
+}</code></pre>
+
+  <div class="callout">
+    <strong>Key rule:</strong> If a variable name is not found in the local scope, search continues in the <em>static parent</em>, then its parent, etc. A declaration in a closer scope <em>hides</em> the same-named variable in an outer scope.
+  </div>
+</section>
+
+<!-- 5.5.2 BLOCKS -->
+<section class="section" id="blocks">
+  <div class="section-header">
+    <span class="section-num">§ 5.5.2</span>
+    <h2 class="section-title">Blocks &amp; Declaration Order</h2>
+  </div>
+  <p>A <strong>block</strong> is a compound statement that can define its own local scope (introduced by ALGOL 60). Variables in a block are typically stack-dynamic.</p>
+  <pre><code>// C — block scope example
+if (list[i] < list[j]) {
+    int temp;           // temp lives only inside this block
+    temp = list[i];
+    list[i] = list[j];
+    list[j] = temp;
+}</code></pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Topic</th><th>C89</th><th>C99 / C++ / Java</th><th>C#</th><th>JavaScript</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Where declarations allowed</td>
+          <td>Top of function only</td>
+          <td>Anywhere a statement can appear</td>
+          <td>Anywhere; scope = whole block</td>
+          <td>Anywhere; scope = whole function</td>
+        </tr>
+        <tr>
+          <td>Re-use name in nested block</td>
+          <td>Allowed</td>
+          <td>Allowed (C++); <strong>illegal in Java &amp; C#</strong></td>
+          <td>Illegal</td>
+          <td>Allowed (var)</td>
+        </tr>
+        <tr>
+          <td><code>for</code> init variable scope</td>
+          <td>Entire enclosing block</td>
+          <td>Restricted to <code>for</code> body (standard C++, Java, C#)</td>
+          <td>Restricted to <code>for</code> body</td>
+          <td>Whole function (<code>var</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 5.5.6 DYNAMIC SCOPE -->
+<section class="section" id="dynamic">
+  <div class="section-header">
+    <span class="section-num">§ 5.5.6</span>
+    <h2 class="section-title">Dynamic Scoping</h2>
+  </div>
+  <p>In dynamic scoping, nonlocal variable resolution is based on the <strong>calling sequence</strong> at run time, not source text. To find a variable, search the current local scope, then the <em>calling</em> function, then its caller, etc.</p>
+  <p><strong>Languages:</strong> APL, SNOBOL4, early Lisp; optional in Perl &amp; Common Lisp.</p>
+
+  <pre><code>// Same big() example — different result under dynamic scoping:
+function big() {
+    var x = 3;
+    function sub1() { var x = 7; sub2(); }
+    function sub2() { var y = x; }   // which x?
+    sub1();
+}
+// Call chain: big → sub1 → sub2
+//   Dynamic: x found in sub1 → x = 7
+// Call chain: big → sub2 (directly)
+//   Dynamic: x found in big → x = 3</code></pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Static Scoping</th><th>Dynamic Scoping</th></tr></thead>
+      <tbody>
+        <tr><td>Resolved by</td><td>Source text (nesting)</td><td>Call sequence (runtime)</td></tr>
+        <tr><td>Determinable at compile time?</td><td>Yes</td><td>No</td></tr>
+        <tr><td>Reliability</td><td>Higher</td><td>Lower (locals exposed to all callees)</td></tr>
+        <tr><td>Readability</td><td>Better</td><td>Harder (must trace call chain)</td></tr>
+        <tr><td>Performance</td><td>Faster nonlocal access</td><td>Slower (runtime search)</td></tr>
+        <tr><td>Parameter passing convenience</td><td>Lower</td><td>Higher (vars implicitly visible)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 5.6 SCOPE vs LIFETIME -->
+<section class="section" id="scopelife">
+  <div class="section-header">
+    <span class="section-num">§ 5.6</span>
+    <h2 class="section-title">Scope vs. Lifetime</h2>
+  </div>
+  <p>These are related but distinct concepts: scope is <em>spatial/textual</em>; lifetime is <em>temporal</em>.</p>
+  <div class="callout">
+    <strong>Example:</strong> A C++ <code>static</code> local has <em>local scope</em> (only visible inside its function) but its <em>lifetime</em> spans the entire program execution.<br><br>
+    <strong>Example:</strong> When <code>compute()</code> calls <code>printheader()</code>, the variable <code>sum</code> (declared in <code>compute</code>) is <em>not in scope</em> inside <code>printheader</code>, but it is still <em>alive</em> (its storage persists) during <code>printheader</code>'s execution.
+  </div>
+</section>
+
+<!-- 5.7 REFERENCING ENVIRONMENT -->
+<section class="section" id="refenv">
+  <div class="section-header">
+    <span class="section-num">§ 5.7</span>
+    <h2 class="section-title">Referencing Environments</h2>
+  </div>
+  <p>The <strong>referencing environment</strong> of a statement is the set of all variables visible to that statement.</p>
+  <ul style="margin: .5rem 0 1rem 1.5rem;">
+    <li><strong>Static-scoped language:</strong> local vars + all visible vars from ancestor scopes.</li>
+    <li><strong>Dynamic-scoped language:</strong> local vars + vars of all currently <em>active</em> subprograms.</li>
+  </ul>
+  <pre><code>// Dynamic scoping example — main calls sub2, sub2 calls sub1
+void sub1() { int a, b; /* point 1 */ }
+void sub2() { int b, c; /* point 2 */ sub1(); }
+void main() { int c, d; /* point 3 */ sub2(); }
+
+// Referencing environments:
+// Point 1: a,b(sub1)  c(sub2)  d(main)  [c of main & b of sub2 hidden]
+// Point 2: b,c(sub2)  d(main)            [c of main hidden]
+// Point 3: c,d(main)</code></pre>
+</section>
+
+<!-- 5.8 NAMED CONSTANTS -->
+<section class="section" id="constants">
+  <div class="section-header">
+    <span class="section-num">§ 5.8</span>
+    <h2 class="section-title">Named Constants &amp; Initialization</h2>
+  </div>
+  <p>A <strong>named constant</strong> is a variable bound to a value exactly once. Benefits: readability, program parameterization (change value in one place).</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Language</th><th>Syntax</th><th>Binding time</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Java</td><td><code>final int X = expr;</code></td><td>Dynamic (any expr)</td><td>Can be set later via assignment</td></tr>
+        <tr><td>C++</td><td><code>const int X = expr;</code></td><td>Dynamic (any expr)</td><td>Expression evaluated at declaration</td></tr>
+        <tr><td>C# <code>const</code></td><td><code>const int X = literal;</code></td><td>Compile time (static)</td><td>Only literals/const expressions allowed</td></tr>
+        <tr><td>C# <code>readonly</code></td><td><code>readonly int X = expr;</code></td><td>Dynamic</td><td>Set in declaration or static constructor</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Initialization</strong>: binding a value to a variable at the same time it is bound to storage. If storage is static → initialization before run time (must use literals/const). If storage is dynamic → initialization is also dynamic.
+  </div>
+</section>
+
+<!-- REVIEW Q&A -->
+<section class="section" id="review">
+  <div class="section-header">
+    <span class="section-num">§ Review</span>
+    <h2 class="section-title">Review Questions &amp; Answers</h2>
+  </div>
+  <p style="margin-bottom:1rem;">Click a question to reveal the answer, or toggle all at once.</p>
+  <button id="toggle-all-btn">SHOW ALL ANSWERS</button>
+
+  <ol class="qa-list">
+
+    <li>
+      <div class="question">What are the design issues for names?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">Two main design issues: (1) <strong>Case sensitivity</strong> — are uppercase and lowercase versions of the same letter treated as the same character? (2) <strong>Reserved words vs. keywords</strong> — can special words be redefined by programmers (keywords) or not (reserved words)?</div>
+    </li>
+
+    <li>
+      <div class="question">What is the potential danger of case-sensitive names?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">Names that <em>look</em> similar (e.g. <code>Rose</code> and <code>rose</code>) actually denote completely different entities. This violates the readability principle that similar-looking constructs should have similar meanings. It is also a <em>writability</em> problem: programmers must remember exact capitalisation (e.g. Java's <code>parseInt</code> vs. <code>ParseInt</code>).</div>
+    </li>
+
+    <li>
+      <div class="question">What is an alias?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">An alias exists when <strong>two or more variable names refer to the same memory location</strong>. Changing one alias inadvertently changes the other, harming readability and making program verification more difficult. Aliases are created via pointer/reference assignment, C/C++ unions, or certain parameter passing mechanisms.</div>
+    </li>
+
+    <li>
+      <div class="question">Which category of C++ reference variables always produces aliases?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>Pointer variables</strong> (and reference variables) create aliases whenever two of them point to the same memory location. Specifically, when a C++ pointer is set to point to a named variable, the dereferenced pointer and the variable name are aliases.</div>
+    </li>
+
+    <li>
+      <div class="question">What is the l-value of a variable? What is the r-value?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>l-value</strong>: the <em>address</em> (memory location) of a variable — what is needed when the variable appears on the <em>left</em> side of an assignment. <strong>r-value</strong>: the <em>contents</em> (value) of that memory location — what is needed when the variable appears on the <em>right</em> side of an assignment.</div>
+    </li>
+
+    <li>
+      <div class="question">Define binding and binding time.</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">A <strong>binding</strong> is an association between an attribute and a program entity (e.g., a variable and its type, or an operator and its meaning). The <strong>binding time</strong> is the moment at which that association is established (language design time, implementation time, compile time, link time, load time, or run time).</div>
+    </li>
+
+    <li>
+      <div class="question">After language design and implementation, what are the four times bindings can take place?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>1. Compile time</strong> — e.g., type of a Java variable. <strong>2. Link time</strong> — e.g., a library call bound to its code. <strong>3. Load time</strong> — e.g., a global variable bound to a storage address. <strong>4. Run time</strong> — e.g., a variable's value, or a heap-dynamic variable's storage.</div>
+    </li>
+
+    <li>
+      <div class="question">Define static binding and dynamic binding.</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">A binding is <strong>static</strong> if it first occurs before run time and remains unchanged throughout program execution. A binding is <strong>dynamic</strong> if it first occurs during run time or can change during execution.</div>
+    </li>
+
+    <li>
+      <div class="question">What are the advantages and disadvantages of implicit declarations?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>Advantage:</strong> Minor programmer convenience — no need to write explicit type declarations for every variable. <strong>Disadvantages:</strong> Reduced reliability, because the compiler cannot detect typographical or type errors (a misspelled variable name simply creates a new variable instead of producing an error).</div>
+    </li>
+
+    <li>
+      <div class="question">What are the advantages and disadvantages of dynamic type binding?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>Advantages:</strong> Greater flexibility — generic programs can handle data of any type; no need to know types at write time. <strong>Disadvantages:</strong> (1) Less reliable — type errors not caught at compile time; (2) Higher cost — type checking at run time, every variable needs a run-time type descriptor, requires an interpreter (typically ≥10× slower than compiled code).</div>
+    </li>
+
+    <li>
+      <div class="question">Define static, stack-dynamic, explicit heap-dynamic, and implicit heap-dynamic variables, with advantages and disadvantages.</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">
+        <strong>Static:</strong> bound before execution begins, lives for entire run. <em>+</em> efficient (direct addressing), history-sensitive. <em>−</em> no recursion, no storage sharing.<br><br>
+        <strong>Stack-dynamic:</strong> allocated on call, deallocated on return. <em>+</em> supports recursion, subprograms share memory. <em>−</em> not history-sensitive, indirect addressing overhead.<br><br>
+        <strong>Explicit heap-dynamic:</strong> allocated/deallocated explicitly by programmer (<code>new</code>/<code>delete</code>). <em>+</em> enables dynamic structures. <em>−</em> error-prone, complex memory management.<br><br>
+        <strong>Implicit heap-dynamic:</strong> all attributes bound at every assignment. <em>+</em> maximum flexibility. <em>−</em> high run-time overhead, loss of compile-time error detection.
+      </div>
+    </li>
+
+    <li>
+      <div class="question">Define lifetime, scope, static scope, and dynamic scope.</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">
+        <strong>Lifetime:</strong> the period from when a variable is bound to storage until it is unbound.<br>
+        <strong>Scope:</strong> the range of program statements in which a variable is visible.<br>
+        <strong>Static scope:</strong> scope determined from source-code text before execution; search for a nonlocal goes to the textual (static) parent.<br>
+        <strong>Dynamic scope:</strong> scope determined by the calling sequence at run time; search for a nonlocal follows the call chain.
+      </div>
+    </li>
+
+    <li>
+      <div class="question">How is a reference to a nonlocal variable in a static-scoped program connected to its definition?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">The compiler searches the declarations of the current (local) subprogram first. If no declaration is found, it searches the <strong>static parent</strong> (the subprogram that syntactically/textually contains the current one), then the static parent's parent, and so on up to the outermost program unit. The first matching declaration found is the one used; if none is found, an undeclared variable error is reported.</div>
+    </li>
+
+    <li>
+      <div class="question">What is the general problem with static scoping?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">Two main problems: (1) It allows <em>more access</em> to variables and subprograms than is actually necessary — it is too coarse-grained a tool. (2) It can be undermined by program evolution: as programs change over time, developers work around static-scope access restrictions by making variables global or flattening nesting, leading to designs that diverge from the original clean structure.</div>
+    </li>
+
+    <li>
+      <div class="question">What is the referencing environment of a statement?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">The collection of <strong>all variables that are visible</strong> in that statement. In a static-scoped language it consists of the local variables plus all visible variables from ancestor scopes. In a dynamic-scoped language it consists of the local variables plus variables in all currently <em>active</em> subprograms (those that have started but not yet terminated).</div>
+    </li>
+
+    <li>
+      <div class="question">What is a static ancestor vs. a dynamic ancestor of a subprogram?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">A <strong>static ancestor</strong> is any subprogram that <em>textually encloses</em> the given subprogram in the source code (static parent, grandparent, etc.). A <strong>dynamic ancestor</strong> is any subprogram that is currently active in the call chain (i.e., has been called but not yet returned) — the calling function, its caller, etc.</div>
+    </li>
+
+    <li>
+      <div class="question">What is a block?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">A <strong>block</strong> is a section of executable code (typically a compound statement enclosed in braces or keywords) that can define its own local variables, creating a new static scope. Introduced in ALGOL 60. Local variables in blocks are stack-dynamic — allocated on entry, deallocated on exit.</div>
+    </li>
+
+    <li>
+      <div class="question">What is the purpose of the let constructs in functional languages?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">A <strong>let</strong> construct creates a local scope in which names are bound to values (expressions). It mirrors the role of a block in imperative languages. The bound names are <em>immutable</em> (like named constants), unlike variables in imperative blocks. The final part of a let is an expression whose value is the result of the whole construct (e.g., Scheme's <code>LET</code>, ML's <code>let…in…end</code>).</div>
+    </li>
+
+    <li>
+      <div class="question">What is the difference between names in an ML let construct and variables declared in a C block?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">In an ML <code>let</code>, names are bound to values <strong>once and cannot be changed</strong> — they act like named constants. In a C block, declared variables are mutable; their values can be changed repeatedly by assignment statements throughout the block's execution.</div>
+    </li>
+
+    <li>
+      <div class="question">Describe the encapsulation of an F# let inside a function and outside all functions.</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>Outside all functions:</strong> a <code>let</code> name is a global whose scope extends from its definition to the end of the file. <strong>Inside a function:</strong> the scope of a <code>let</code> extends from after its defining expression to the end of the function. Indenting subsequent code creates a nested local scope that ends when the indentation ends — names defined in the nested scope are not visible outside it.</div>
+    </li>
+
+    <li>
+      <div class="question">What are the advantages and disadvantages of dynamic scoping?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer"><strong>Advantage:</strong> Parameters defined in a calling subprogram do not need to be explicitly passed to called subprograms — they are implicitly visible. <strong>Disadvantages:</strong> (1) Nonlocal variables cannot be statically type-checked; (2) Programs are harder to read (must trace the call chain); (3) Local variables are exposed to all called subprograms — no protection; (4) Nonlocal access is slower (runtime search required).</div>
+    </li>
+
+    <li>
+      <div class="question">What are the advantages of named constants?</div>
+      <button class="toggle-btn" onclick="toggleAnswer(this)">▼ SHOW ANSWER</button>
+      <div class="answer">(1) <strong>Readability</strong> — a meaningful name (e.g., <code>PI</code>) is clearer than a bare literal. (2) <strong>Modifiability (parameterization)</strong> — changing the constant in one place updates it everywhere it is used, reducing errors and tedium. (3) <strong>Reliability</strong> — the compiler can prevent accidental mutation of the value.</div>
+    </li>
+
+  </ol>
+</section>
+
+</main>
+
+<footer>Concepts of Programming Languages — Chapter 5 Study Guide</footer>
+
+<script>
+  function toggleAnswer(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = answer.classList.contains('open');
+    answer.classList.toggle('open', !isOpen);
+    btn.textContent = isOpen ? '▼ SHOW ANSWER' : '▲ HIDE ANSWER';
+  }
+
+  const toggleAllBtn = document.getElementById('toggle-all-btn');
+  let allOpen = false;
+  toggleAllBtn.addEventListener('click', () => {
+    allOpen = !allOpen;
+    document.querySelectorAll('.answer').forEach(a => a.classList.toggle('open', allOpen));
+    document.querySelectorAll('.toggle-btn').forEach(b => {
+      b.textContent = allOpen ? '▲ HIDE ANSWER' : '▼ SHOW ANSWER';
+    });
+    toggleAllBtn.textContent = allOpen ? 'HIDE ALL ANSWERS' : 'SHOW ALL ANSWERS';
+  });
+</script>
+</body>
+</html>

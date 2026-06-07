@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 8 — Statement-Level Control Structures</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141418;
+    --surface2: #1c1c22;
+    --border: #2a2a35;
+    --accent: #e8c547;
+    --accent2: #5b8cff;
+    --accent3: #ff6b6b;
+    --accent4: #4ecdc4;
+    --text: #e8e8f0;
+    --text-dim: #8888a0;
+    --text-bright: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,197,71,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    color: var(--text-bright);
+    line-height: 1.1;
+    max-width: 700px;
+  }
+  header h1 span { color: var(--accent); }
+  .header-sub {
+    margin-top: 16px;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    gap: 8px;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    background: rgba(13,13,15,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+  nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  nav a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* MAIN */
+  main { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+  /* SECTION */
+  section {
+    margin-bottom: 60px;
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  /* CONCEPT CARD */
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .concept-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 4px 0 0 4px;
+  }
+  .concept-card.blue::before { background: var(--accent2); }
+  .concept-card.red::before { background: var(--accent3); }
+  .concept-card.teal::before { background: var(--accent4); }
+
+  .concept-card h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .concept-card.blue h3 { color: var(--accent2); }
+  .concept-card.red h3 { color: var(--accent3); }
+  .concept-card.teal h3 { color: var(--accent4); }
+
+  .concept-card p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.75;
+  }
+
+  /* KEY FACT BOX */
+  .key-fact {
+    background: rgba(232,197,71,0.06);
+    border: 1px solid rgba(232,197,71,0.25);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .key-fact strong {
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* TABLES */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead {
+    background: var(--surface2);
+  }
+  thead th {
+    padding: 14px 18px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td {
+    padding: 14px 18px;
+    vertical-align: top;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  tbody td:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    color: var(--text-bright);
+    white-space: nowrap;
+  }
+
+  /* CODE */
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--accent4);
+  }
+  pre {
+    background: #0a0a0c;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #c8c8e0;
+    margin: 12px 0;
+  }
+  pre .kw  { color: #5b8cff; }
+  pre .str { color: #e8c547; }
+  pre .cmt { color: #555570; font-style: italic; }
+  pre .fn  { color: #4ecdc4; }
+  pre .num { color: #ff6b6b; }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .badge-yellow { background: rgba(232,197,71,0.15); color: var(--accent); border: 1px solid rgba(232,197,71,0.3); }
+  .badge-blue   { background: rgba(91,140,255,0.15); color: var(--accent2); border: 1px solid rgba(91,140,255,0.3); }
+  .badge-red    { background: rgba(255,107,107,0.15); color: var(--accent3); border: 1px solid rgba(255,107,107,0.3); }
+  .badge-teal   { background: rgba(78,205,196,0.15); color: var(--accent4); border: 1px solid rgba(78,205,196,0.3); }
+
+  /* EXAM BOX */
+  .exam-box {
+    background: var(--surface);
+    border: 1px solid rgba(91,140,255,0.3);
+    border-radius: 4px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+  .exam-box .exam-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .exam-box .q {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-bright);
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  .exam-box .a {
+    font-size: 13.5px;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    line-height: 1.8;
+  }
+  .exam-box .a strong { color: var(--accent); }
+
+  /* TWO COLS */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    margin: 40px 0;
+    opacity: 0.3;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Sebesta · Concepts of Programming Languages</div>
+  <h1>Chapter <span>8</span> — Statement-Level Control Structures</h1>
+  <div class="header-sub">// Quiz Study Guide · Sections 8.1 → 8.4</div>
+</header>
+
+<nav>
+  <a href="#s81">8.1 Intro</a>
+  <a href="#s821">8.2.1 Two-Way</a>
+  <a href="#s822">8.2.2 Multiple</a>
+  <a href="#s831">8.3.1 Counter Loops</a>
+  <a href="#s832">8.3.2 Logical Loops</a>
+  <a href="#s833">8.3.3 User-Located</a>
+  <a href="#s834">8.3.4 Data Iteration</a>
+  <a href="#s84">8.4 Goto</a>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════ 8.1 -->
+<section id="s81">
+  <div class="section-header">
+    <span class="section-num">§ 8.1</span>
+    <span class="section-title">Introduction</span>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ Core Result — Böhm & Jacopini (1966)</strong>
+    Any algorithm expressible as a flowchart can be coded using only <strong>two</strong> control statements: (1) two-way selection and (2) logically controlled iteration. This proves the goto is mathematically unnecessary.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>Main Idea</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Control Statement</td>
+          <td>Provides selection or iteration — the two extra mechanisms needed beyond assignment statements</td>
+          <td>Without them, useful programs would be impossible</td>
+        </tr>
+        <tr>
+          <td>Control Structure</td>
+          <td>A control statement <em>plus</em> the collection of statements it controls</td>
+          <td>The broader unit including the body</td>
+        </tr>
+        <tr>
+          <td>Böhm & Jacopini</td>
+          <td>Only 2 control statements are mathematically sufficient</td>
+          <td>Makes goto nonessential (but not useless)</td>
+        </tr>
+        <tr>
+          <td>Writability vs. Readability</td>
+          <td>More control statements → easier to write, harder to read (bigger language to learn)</td>
+          <td>Too few → forces use of low-level goto, also hurts readability</td>
+        </tr>
+        <tr>
+          <td>The One Design Issue</td>
+          <td>Should a control structure have <strong>multiple entries</strong>?</td>
+          <td>Consensus: No — adds little flexibility, harms readability significantly</td>
+        </tr>
+        <tr>
+          <td>Multiple Entries</td>
+          <td>Jumping into the middle of a control structure from outside it</td>
+          <td>Only possible in languages with <strong>goto + statement labels</strong></td>
+        </tr>
+        <tr>
+          <td>Multiple Exits</td>
+          <td>Not a design issue — all languages allow them</td>
+          <td>Safe as long as exit targets are immediately after the structure, not arbitrary locations</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="exam-box">
+    <div class="exam-label">🎯 Possible Exam Question</div>
+    <div class="q">"Böhm and Jacopini proved that only two control statements are necessary. What are they, and what does this imply about the goto?"</div>
+    <div class="a"><strong>Answer:</strong> The two essential statements are (1) <strong>two-way selection</strong> and (2) <strong>logically controlled iteration</strong>. The implication is that the goto is <strong>superfluous</strong> — it is powerful and can build all other control structures, but it is not mathematically necessary. This fueled the debate about whether goto should be eliminated from languages entirely.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.2.1 -->
+<section id="s821">
+  <div class="section-header">
+    <span class="section-num">§ 8.2.1</span>
+    <span class="section-title">Two-Way Selection Statements</span>
+  </div>
+
+  <div class="concept-card">
+    <h3>General Form</h3>
+    <p>All two-way selectors follow the same conceptual structure:</p>
+    <pre><span class="kw">if</span> control_expression
+  <span class="kw">then</span> clause
+  <span class="kw">else</span> clause</pre>
+    <p>Three design questions determine how this plays out across languages.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Design Issue</th>
+          <th>Options</th>
+          <th>Language Examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Control Expression Type</td>
+          <td>Arithmetic only / Boolean only / Both</td>
+          <td>
+            <span class="badge badge-yellow">C89</span> arithmetic only (0=false, nonzero=true)<br>
+            <span class="badge badge-blue">C99/C++/Python</span> both arithmetic &amp; Boolean<br>
+            <span class="badge badge-teal">Most modern</span> Boolean only
+          </td>
+        </tr>
+        <tr>
+          <td>Clause Form</td>
+          <td>Single / Compound / Sequence</td>
+          <td>
+            <span class="badge badge-yellow">Most languages</span> single or compound (braces)<br>
+            <span class="badge badge-red">Perl</span> always compound, even for one statement<br>
+            <span class="badge badge-blue">Python/Ruby</span> statement sequences + reserved word terminator<br>
+            <span class="badge badge-teal">Python</span> uses indentation + colon instead of <code>then</code>
+          </td>
+        </tr>
+        <tr>
+          <td>Nesting / Dangling Else</td>
+          <td>Rule-based / Syntax-based / Indentation</td>
+          <td>
+            <span class="badge badge-yellow">Java/C/C++/C#</span> else pairs with nearest unpaired then (rule)<br>
+            <span class="badge badge-red">Perl</span> no problem — all clauses must be compound<br>
+            <span class="badge badge-blue">Ruby</span> <code>end</code> keyword closes each if explicitly<br>
+            <span class="badge badge-teal">Python</span> indentation determines pairing<br>
+            <span class="badge badge-red">ML</span> no problem — else-less if not allowed
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card blue">
+    <h3>The Dangling Else Problem — Key Example</h3>
+    <div class="two-col">
+      <div>
+        <p style="font-size:13px; color: var(--text-dim); margin-bottom:8px;">Ambiguous (Java/C) — else pairs with <em>inner</em> if by rule:</p>
+        <pre><span class="kw">if</span> (sum == <span class="num">0</span>)
+  <span class="kw">if</span> (count == <span class="num">0</span>)
+    result = <span class="num">0</span>;
+  <span class="kw">else</span>           <span class="cmt">// ← pairs with inner if</span>
+    result = <span class="num">1</span>;</pre>
+      </div>
+      <div>
+        <p style="font-size:13px; color: var(--text-dim); margin-bottom:8px;">Force outer pairing in Java using braces:</p>
+        <pre><span class="kw">if</span> (sum == <span class="num">0</span>) {
+  <span class="kw">if</span> (count == <span class="num">0</span>)
+    result = <span class="num">0</span>;
+}
+<span class="kw">else</span>           <span class="cmt">// ← now pairs with outer if</span>
+  result = <span class="num">1</span>;</pre>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:13px; color: var(--text-dim); margin-bottom:8px;">Ruby — unambiguous with <code>end</code>:</p>
+      <pre><span class="kw">if</span> sum == <span class="num">0</span> <span class="kw">then</span>
+  <span class="kw">if</span> count == <span class="num">0</span> <span class="kw">then</span>
+    result = <span class="num">0</span>
+  <span class="kw">end</span>          <span class="cmt">// closes inner if — else below pairs with outer</span>
+<span class="kw">else</span>
+  result = <span class="num">1</span>
+<span class="kw">end</span></pre>
+    </div>
+  </div>
+
+  <div class="concept-card teal">
+    <h3>Selector Expressions (Functional Languages)</h3>
+    <p>In <strong>ML, F#, LISP</strong> — <code>if</code> is an <strong>expression</strong> that returns a value, not a statement. It can appear anywhere an expression can. In F#, both clauses must return the <strong>same type</strong>. If no else clause exists, the then clause can only return <code>()</code> — the unit type (no value).</p>
+    <pre><span class="kw">let</span> y =
+  <span class="kw">if</span> x > <span class="num">0</span> <span class="kw">then</span> x
+  <span class="kw">else</span> <span class="num">2</span> * x;;   <span class="cmt">// y gets x or 2*x depending on condition</span></pre>
+  </div>
+
+  <div class="exam-box">
+    <div class="exam-label">🎯 Possible Exam Question</div>
+    <div class="q">"What is the dangling else problem, and describe two different language design approaches used to solve it?"</div>
+    <div class="a">
+      <strong>Answer:</strong> The dangling else problem occurs when an else clause follows two nested then clauses with no intervening else, making it ambiguous which if the else belongs to.<br><br>
+      <strong>Approach 1 — Static semantics rule</strong> (Java, C, C++): The else always pairs with the nearest previous unpaired then clause. Programmers must use braces to force the alternative interpretation.<br><br>
+      <strong>Approach 2 — Required compound clauses</strong> (Perl): All clauses must always be wrapped in braces, so structure is always explicit and no ambiguity can arise.<br><br>
+      <strong>Approach 3 — Closing reserved word</strong> (Ruby): Every if is explicitly closed with <code>end</code>, making it clear exactly which if each else belongs to.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.2.2 -->
+<section id="s822">
+  <div class="section-header">
+    <span class="section-num">§ 8.2.2</span>
+    <span class="section-title">Multiple-Selection Statements</span>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ Key Idea</strong>
+    A multiple-selection statement is a generalization of the two-way selector — it chooses one of <em>any number</em> of paths. Although it could be built from nested if-else + goto, the result would be unreadable and unreliable.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Statement</th>
+          <th>Control Expression Type</th>
+          <th>Fall-Through?</th>
+          <th>Key Distinction</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C / C++</td>
+          <td><code>switch</code></td>
+          <td>Discrete (int, char, enum)</td>
+          <td>✅ Yes — needs explicit <code>break</code></td>
+          <td>No implicit branches; case labels treated like normal statement labels — can appear almost anywhere</td>
+        </tr>
+        <tr>
+          <td>Java</td>
+          <td><code>switch</code></td>
+          <td>Discrete (int, char, enum, String)</td>
+          <td>✅ Yes — needs explicit <code>break</code></td>
+          <td>Case expressions only allowed at top level of switch body — no complex nesting like C</td>
+        </tr>
+        <tr>
+          <td>C#</td>
+          <td><code>switch</code></td>
+          <td>Discrete + <strong>String</strong></td>
+          <td>❌ No — static rule requires explicit <code>break</code> or <code>goto</code></td>
+          <td>Every segment must end with unconditional branch; control expression can be a string</td>
+        </tr>
+        <tr>
+          <td>PHP</td>
+          <td><code>switch</code></td>
+          <td>Any scalar: string, int, double</td>
+          <td>✅ Yes — needs explicit <code>break</code></td>
+          <td>More type flexibility than C — allows doubles and strings as case values</td>
+        </tr>
+        <tr>
+          <td>Ruby</td>
+          <td><code>case</code></td>
+          <td>Boolean expressions</td>
+          <td>❌ No</td>
+          <td>Returns a <em>value</em> (it's an expression); evaluates Boolean conditions top to bottom</td>
+        </tr>
+        <tr>
+          <td>Perl / Python</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td><strong>No multiple-selection statement</strong> — use else-if instead</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card">
+    <h3>C switch — Fall-Through Problem</h3>
+    <div class="two-col">
+      <div>
+        <p style="font-size:13px;color:var(--accent3);margin-bottom:6px;">Without break — falls through everything:</p>
+        <pre><span class="kw">switch</span> (index) {
+  <span class="kw">case</span> <span class="num">1</span>:
+  <span class="kw">case</span> <span class="num">3</span>: odd++;
+          sumodd += index;
+  <span class="kw">case</span> <span class="num">2</span>:
+  <span class="kw">case</span> <span class="num">4</span>: even++;  <span class="cmt">// always runs!</span>
+  <span class="kw">default</span>: <span class="fn">printf</span>(<span class="str">"Error\n"</span>); <span class="cmt">// always runs!</span>
+}</pre>
+      </div>
+      <div>
+        <p style="font-size:13px;color:var(--accent4);margin-bottom:6px;">With break — restricted to one segment:</p>
+        <pre><span class="kw">switch</span> (index) {
+  <span class="kw">case</span> <span class="num">1</span>:
+  <span class="kw">case</span> <span class="num">3</span>: odd++;
+          sumodd += index;
+          <span class="kw">break</span>;
+  <span class="kw">case</span> <span class="num">2</span>:
+  <span class="kw">case</span> <span class="num">4</span>: even++;
+          <span class="kw">break</span>;
+  <span class="kw">default</span>: <span class="fn">printf</span>(<span class="str">"Error\n"</span>);
+}</pre>
+      </div>
+    </div>
+    <p style="font-size:13px; margin-top:12px;">Note: empty cases 1 and 3 <em>intentionally</em> fall through to share code with cases 3 and 4. This is the <strong>flexibility</strong> the design offers — at the cost of <strong>reliability</strong>.</p>
+  </div>
+
+  <div class="concept-card teal">
+    <h3>Implementing Multiple Selection — Compiler Strategies</h3>
+    <div class="table-wrap" style="margin-top:12px;">
+      <table>
+        <thead>
+          <tr><th>Situation</th><th>Strategy</th><th>Performance</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Few cases (&lt;10)</td>
+            <td>Conditional branches or linear search on table</td>
+            <td>~N/2 tests on average — simple but slow for large N</td>
+          </tr>
+          <tr>
+            <td>Many cases (≥10)</td>
+            <td>Hash table of segment labels</td>
+            <td>Near-constant time for any case</td>
+          </tr>
+          <tr>
+            <td>Range-based cases (e.g. Ruby)</td>
+            <td>Binary search table</td>
+            <td>O(log N) — hash doesn't work with ranges</td>
+          </tr>
+          <tr>
+            <td>Dense case values (&gt;50% of range covered)</td>
+            <td>Array indexed by case value, values are segment labels</td>
+            <td>O(1) array lookup — fastest possible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="concept-card blue">
+    <h3>else-if / elif — Not Redundant with switch</h3>
+    <p>When selection depends on <strong>Boolean expressions</strong> rather than a single discrete value, switch is inadequate. else-if handles this and is <em>more general</em>.</p>
+    <div class="two-col">
+      <div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">Python <code>elif</code>:</p>
+        <pre><span class="kw">if</span> count < <span class="num">10</span>:
+    bag1 = <span class="kw">True</span>
+<span class="kw">elif</span> count < <span class="num">100</span>:
+    bag2 = <span class="kw">True</span>
+<span class="kw">elif</span> count < <span class="num">1000</span>:
+    bag3 = <span class="kw">True</span></pre>
+      </div>
+      <div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">Scheme <code>COND</code>:</p>
+        <pre>(<span class="kw">COND</span>
+  ((> x y) <span class="str">"x greater"</span>)
+  ((< x y) <span class="str">"y greater"</span>)
+  (<span class="kw">ELSE</span>   <span class="str">"equal"</span>)
+)</pre>
+      </div>
+    </div>
+    <p style="font-size:13px; margin-top:8px;">Scheme's COND evaluates predicates top-to-bottom; returns the expression of the first true predicate. Always include ELSE — without it, if no predicate is true the result is <strong>unspecified</strong>.</p>
+  </div>
+
+  <div class="exam-box">
+    <div class="exam-label">🎯 Possible Exam Question</div>
+    <div class="q">"Explain the fall-through behavior of C's switch statement. What problem does it create, and how does C# solve it differently?"</div>
+    <div class="a">
+      <strong>Answer:</strong> C's switch has <strong>no implicit branches</strong> at the end of each selectable segment. Once a matching case is found, execution continues into the next segment unless an explicit <code>break</code> is used. This was intentional — it allows multiple case values to share code via empty cases. However, a forgotten <code>break</code> silently causes wrong behavior, creating a <strong>reliability problem</strong>.<br><br>
+      C# solves this with a <strong>static semantics rule</strong> requiring every segment to end with an explicit unconditional branch — either <code>break</code> (exits switch) or <code>goto case</code> (jumps to another segment). This makes accidental fall-through impossible while still allowing intentional transfers.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.3.1 -->
+<section id="s831">
+  <div class="section-header">
+    <span class="section-num">§ 8.3.1</span>
+    <span class="section-title">Counter-Controlled Loops</span>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ Terminology</strong>
+    <strong>Loop variable</strong> = holds count value · <strong>Loop parameters</strong> = initial value, terminal value, stepsize · <strong>Pretest</strong> = condition checked before body · <strong>Posttest</strong> = condition checked after body
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Syntax</th>
+          <th>Loop Variable Changeable?</th>
+          <th>Parameters Evaluated</th>
+          <th>Value After Termination</th>
+          <th>Key Feature</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C / C++</td>
+          <td><code>for(e1; e2; e3)</code></td>
+          <td>✅ Yes</td>
+          <td>e1 once; e2 &amp; e3 every iteration</td>
+          <td>Last value assigned</td>
+          <td>Most flexible — no explicit loop var, all expressions optional, multiple vars via comma</td>
+        </tr>
+        <tr>
+          <td>C99 / C++</td>
+          <td><code>for(int i=0; ...)</code></td>
+          <td>✅ Yes</td>
+          <td>Same as C</td>
+          <td>Out of scope after loop</td>
+          <td>Can declare variable inside first expression; scope is loop body only</td>
+        </tr>
+        <tr>
+          <td>Java / C#</td>
+          <td>Like C++</td>
+          <td>✅ Yes</td>
+          <td>Same as C</td>
+          <td>Out of scope</td>
+          <td>Control expression must be <strong>boolean</strong> (not arithmetic)</td>
+        </tr>
+        <tr>
+          <td>Python</td>
+          <td><code>for var in object</code></td>
+          <td>✅ Yes, but <strong>no effect on loop</strong></td>
+          <td>Object evaluated once</td>
+          <td>Last assigned value</td>
+          <td>Iterates over a sequence/range; optional <code>else</code> clause on normal termination</td>
+        </tr>
+        <tr>
+          <td>F# (functional)</td>
+          <td>Recursive function</td>
+          <td>N/A — no variables</td>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>Uses recursion; loop body is a function parameter; <code>rec</code> keyword marks recursive function</td>
+        </tr>
+        <tr>
+          <td>Fortran 90</td>
+          <td><code>DO</code></td>
+          <td>—</td>
+          <td>—</td>
+          <td><strong>Undefined</strong> after termination</td>
+          <td>Loop variable deliberately made undefined post-loop</td>
+        </tr>
+        <tr>
+          <td>Ada</td>
+          <td><code>for</code></td>
+          <td>—</td>
+          <td>—</td>
+          <td><strong>Out of scope</strong> — scope is the loop</td>
+          <td>Loop variable scoped entirely within the loop construct</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card">
+    <h3>C for — Operational Semantics</h3>
+    <pre><span class="cmt">// for (e1; e2; e3) { body }</span>
+e1
+loop:
+  <span class="kw">if</span> e2 == <span class="num">0</span> <span class="kw">goto</span> out
+  [loop body]
+  e3
+  <span class="kw">goto</span> loop
+out: ...</pre>
+    <p style="font-size:13px; margin-top:10px;">All three expressions are optional. An absent e2 is treated as <strong>true</strong> → potentially infinite loop. Legal to branch into the loop body (though dangerous).</p>
+  </div>
+
+  <div class="concept-card blue">
+    <h3>F# Counter Loop via Recursion</h3>
+    <pre><span class="kw">let rec</span> <span class="fn">forLoop</span> loopBody reps =
+  <span class="kw">if</span> reps <= <span class="num">0</span> <span class="kw">then</span>
+    ()          <span class="cmt">// unit type — "do nothing", required because F# has no empty statement</span>
+  <span class="kw">else</span>
+    loopBody()
+    <span class="fn">forLoop</span> loopBody (reps - <span class="num">1</span>);;</pre>
+    <p style="font-size:13px; margin-top:10px;"><code>rec</code> marks the function as recursive. Every <code>if</code> must have an <code>else</code> in F#, hence the <code>()</code> unit type placeholder.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.3.2 -->
+<section id="s832">
+  <div class="section-header">
+    <span class="section-num">§ 8.3.2</span>
+    <span class="section-title">Logically Controlled Loops</span>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ Key Fact</strong>
+    Logically controlled loops are <strong>more general</strong> than counter-controlled — every counting loop can be built with a logical loop, but not vice versa. These are one of the two structures proven essential by Böhm &amp; Jacopini.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Form</th>
+          <th>Language</th>
+          <th>Syntax</th>
+          <th>Body Executes Min.</th>
+          <th>Control Expression</th>
+          <th>Can Branch Into Body?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pretest</strong></td>
+          <td>C / C++</td>
+          <td><code>while (expr) body</code></td>
+          <td>0 times</td>
+          <td>C89: arithmetic; C99+: arithmetic or Boolean</td>
+          <td>✅ Yes (legal in C/C++)</td>
+        </tr>
+        <tr>
+          <td><strong>Posttest</strong></td>
+          <td>C / C++</td>
+          <td><code>do body while (expr);</code></td>
+          <td><strong>1 time (always)</strong></td>
+          <td>Same as above</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><strong>Pretest</strong></td>
+          <td>Java</td>
+          <td><code>while (expr) body</code></td>
+          <td>0 times</td>
+          <td>Boolean only</td>
+          <td>❌ No (no goto in Java)</td>
+        </tr>
+        <tr>
+          <td><strong>Posttest</strong></td>
+          <td>Java</td>
+          <td><code>do body while (expr);</code></td>
+          <td>1 time</td>
+          <td>Boolean only</td>
+          <td>❌ No</td>
+        </tr>
+        <tr>
+          <td><strong>Pretest (simulated)</strong></td>
+          <td>F# (functional)</td>
+          <td>Recursive function</td>
+          <td>0 times</td>
+          <td>A boolean-returning function</td>
+          <td>N/A</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card red">
+    <h3>⚠️ Posttest Danger</h3>
+    <p>Posttest loops always execute the body <strong>at least once</strong>, even if the condition is false from the start. This is a common source of bugs — programmers sometimes forget this behavior. The syntactic placement of the condition <em>after</em> the body helps remind the reader, but it remains a source of errors.</p>
+    <pre><span class="cmt">// do-while operational semantics:</span>
+loop:
+  [loop body]               <span class="cmt">// always runs first</span>
+  <span class="kw">if</span> control_expression <span class="kw">goto</span> loop</pre>
+  </div>
+
+  <div class="concept-card blue">
+    <h3>F# Logical Loop Simulation</h3>
+    <pre><span class="kw">let rec</span> <span class="fn">whileLoop</span> test body =
+  <span class="kw">if</span> <span class="fn">test</span>() <span class="kw">then</span>
+    body()
+    <span class="fn">whileLoop</span> test body
+  <span class="kw">else</span>
+    ();;</pre>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.3.3 -->
+<section id="s833">
+  <div class="section-header">
+    <span class="section-num">§ 8.3.3</span>
+    <span class="section-title">User-Located Loop Control Mechanisms</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Statement</th>
+          <th>Language</th>
+          <th>Type</th>
+          <th>Effect</th>
+          <th>Can Exit Multiple Loops?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>break</code></td>
+          <td>C, C++, Python, Ruby, C#</td>
+          <td>Unconditional, <strong>unlabeled</strong></td>
+          <td>Exits the <em>innermost</em> enclosing loop immediately</td>
+          <td>❌ No — innermost only</td>
+        </tr>
+        <tr>
+          <td><code>break label</code></td>
+          <td>Java</td>
+          <td>Unconditional, <strong>labeled</strong></td>
+          <td>Exits the loop named by the label — can be an outer loop</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><code>last</code></td>
+          <td>Perl</td>
+          <td>Unconditional, <strong>labeled</strong></td>
+          <td>Same as Java's labeled break</td>
+          <td>✅ Yes</td>
+        </tr>
+        <tr>
+          <td><code>continue</code></td>
+          <td>C, C++, Python</td>
+          <td>Unconditional, unlabeled</td>
+          <td>Skips rest of current iteration, transfers to loop control — does <strong>not</strong> exit the loop</td>
+          <td>❌ Not an exit</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card">
+    <h3>Java Labeled break — Exiting an Outer Loop</h3>
+    <pre>outerLoop:
+<span class="kw">for</span> (row = <span class="num">0</span>; row < numRows; row++)
+  <span class="kw">for</span> (col = <span class="num">0</span>; col < numCols; col++) {
+    sum += mat[row][col];
+    <span class="kw">if</span> (sum > <span class="num">1000.0</span>)
+      <span class="kw">break</span> outerLoop;  <span class="cmt">// exits the outer for, not just the inner</span>
+  }</pre>
+  </div>
+
+  <div class="concept-card blue">
+    <h3>continue vs break</h3>
+    <div class="two-col">
+      <div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:6px;"><code>continue</code> — skips rest of body, checks condition again:</p>
+        <pre><span class="kw">while</span> (sum < <span class="num">1000</span>) {
+  <span class="fn">getnext</span>(value);
+  <span class="kw">if</span> (value < <span class="num">0</span>) <span class="kw">continue</span>;
+  sum += value;  <span class="cmt">// skipped if negative</span>
+}</pre>
+      </div>
+      <div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:6px;"><code>break</code> — exits the loop entirely:</p>
+        <pre><span class="kw">while</span> (sum < <span class="num">1000</span>) {
+  <span class="fn">getnext</span>(value);
+  <span class="kw">if</span> (value < <span class="num">0</span>) <span class="kw">break</span>;
+  sum += value;  <span class="cmt">// loop is over if negative</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ These are camouflaged gotos — but safe ones</strong>
+    break/continue/last are restricted gotos. Their targets must be <em>below</em> the exit and only immediately after a loop body — unlike real goto which can jump anywhere. This restriction preserves readability. In fact, avoiding them would result in more convoluted code.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.3.4 -->
+<section id="s834">
+  <div class="section-header">
+    <span class="section-num">§ 8.3.4</span>
+    <span class="section-title">Iteration Based on Data Structures</span>
+  </div>
+
+  <div class="key-fact">
+    <strong>⚡ Key Property of an Iterator</strong>
+    An iterator must be <strong>history sensitive</strong> — it must remember which element it last returned so it can visit every element exactly once without repetition. The loop terminates when the iterator finds no more elements.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Mechanism</th>
+          <th>Syntax / Example</th>
+          <th>Key Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Java 5.0+</td>
+          <td>Enhanced <code>for</code> (foreach)</td>
+          <td><code>for (String e : myList) { ... }</code></td>
+          <td>Works on arrays and any collection implementing <code>Iterable</code>. All predefined generic collections implement it.</td>
+        </tr>
+        <tr>
+          <td>C#</td>
+          <td><code>foreach</code></td>
+          <td><code>foreach (String name in names) Console.WriteLine(name);</code></td>
+          <td>All generic collections (List, Stack, Queue, Dictionary) have built-in iterators. Users can implement <code>IEnumerator</code> for custom iterators.</td>
+        </tr>
+        <tr>
+          <td>Ruby</td>
+          <td>Blocks + <code>each</code></td>
+          <td><code>list.each {|value| puts value}</code></td>
+          <td>Block is an anonymous method passed as a parameter. <code>|value|</code> is the block parameter. <code>yield</code> inside a method calls the attached block.</td>
+        </tr>
+        <tr>
+          <td>Ruby</td>
+          <td><code>times</code></td>
+          <td><code>4.times {puts "Hey!"}</code></td>
+          <td>Sends the block to the integer object. Returns the receiver (4 in this case).</td>
+        </tr>
+        <tr>
+          <td>Ruby</td>
+          <td><code>upto</code></td>
+          <td><code>1.upto(5) {|x| print x, " "}</code></td>
+          <td>Ruby has <strong>no real for statement</strong> — for loops are converted to <code>upto</code> calls internally.</td>
+        </tr>
+        <tr>
+          <td>Python</td>
+          <td>Generator / <code>yield</code></td>
+          <td><code>yield nod</code> inside a method</td>
+          <td>Any method with <code>yield</code> is a <strong>generator</strong>. On each call, resumes from where it left off rather than restarting. Local state is preserved across calls.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="concept-card teal">
+    <h3>Python Generator — How yield Works</h3>
+    <pre><span class="kw">class</span> <span class="fn">MyStructure</span>:
+  <span class="kw">def</span> <span class="fn">traverse</span>(self):
+    <span class="cmt"># if there is another node, set nod to next node</span>
+    <span class="kw">yield</span> nod   <span class="cmt"># returns nod, then RESUMES HERE on next call</span></pre>
+    <p style="font-size:13px; margin-top:10px;">Unlike a regular <code>return</code>, <code>yield</code> suspends the function and saves its state. The next call picks up exactly where it left off. This makes it naturally history-sensitive without storing all elements in memory first.</p>
+  </div>
+
+  <div class="exam-box">
+    <div class="exam-label">🎯 Possible Exam Question</div>
+    <div class="q">"What is an iterator in the context of data structure-based iteration, and what is the key property it must have? Give an example from any language."</div>
+    <div class="a">
+      <strong>Answer:</strong> An iterator is a user-defined function used in data structure-based iteration that returns the <strong>next element</strong> of a data structure each time it is called. Its essential property is that it must be <strong>history sensitive</strong> — it must remember which element it last returned so it can visit every element exactly once and detect when no more remain.<br><br>
+      <strong>Example — Python generator:</strong> A method containing <code>yield</code> acts as an iterator. On the first call, it returns the first node. On subsequent calls, execution resumes from where it left off (after the <code>yield</code>), returning the next node. Local state is preserved across calls, making it naturally history-sensitive.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════ 8.4 -->
+<section id="s84">
+  <div class="section-header">
+    <span class="section-num">§ 8.4</span>
+    <span class="section-title">Unconditional Branching (goto)</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>Main Idea</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>goto Power</td>
+          <td>Most powerful flow control — can build all other control structures from goto + selector</td>
+          <td>This power is exactly what makes it dangerous</td>
+        </tr>
+        <tr>
+          <td>goto Danger</td>
+          <td>Can force any statement to follow any other regardless of textual order</td>
+          <td>Readability is best when execution order ≈ textual order (top to bottom)</td>
+        </tr>
+        <tr>
+          <td>Dijkstra (1968)</td>
+          <td>First widely-read argument against goto — called it "too primitive"</td>
+          <td>Sparked major debate in computing; argued for restricting or eliminating goto</td>
+        </tr>
+        <tr>
+          <td>Knuth (1974)</td>
+          <td>Argued against <em>complete</em> elimination</td>
+          <td>Said there are occasions where goto's efficiency outweighs its harm to readability</td>
+        </tr>
+        <tr>
+          <td>Partial Restriction</td>
+          <td>Restricting goto to transfer control <strong>only downward</strong> partially alleviates the problem</td>
+          <td>Allows error handling but prevents building loops</td>
+        </tr>
+        <tr>
+          <td>Languages without goto</td>
+          <td>Java, Python, Ruby</td>
+          <td>Provide additional control statements (loop exits) to cover legitimate goto use cases</td>
+        </tr>
+        <tr>
+          <td>Languages with goto</td>
+          <td>C, C++, C# (and most popular languages)</td>
+          <td>C's designers called it "infinitely abusable" yet kept it; C# includes it even though Java doesn't</td>
+        </tr>
+        <tr>
+          <td>Loop Exits as goto</td>
+          <td>break, continue, last are <strong>camouflaged gotos</strong></td>
+          <td>But severely restricted — targets must be below the exit and only after a loop. Do NOT harm readability.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="exam-box">
+    <div class="exam-label">🎯 Possible Exam Question</div>
+    <div class="q">"Why is the goto statement considered dangerous, and what was the main conclusion of the historical debate around it?"</div>
+    <div class="a">
+      <strong>Answer:</strong> The goto is dangerous because it can transfer control to <strong>any statement anywhere</strong> in the program regardless of textual order, severely harming readability. Readability is best when execution order matches textual top-to-bottom order, and unrestricted gotos destroy this property, making programs unreliable and costly to maintain.<br><br>
+      The historical debate, sparked by <strong>Dijkstra's 1968 letter</strong>, concluded that while goto is mathematically unnecessary (Böhm &amp; Jacopini), complete elimination is not always justified. The practical resolution was: languages without goto should provide <strong>additional restricted control statements</strong> (like loop exits) to handle legitimate goto use cases, and if goto is included, restricting it to transfer control <strong>only downward</strong> partially alleviates the readability problem.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Sebesta · Concepts of Programming Languages · Chapter 8 · Sections 8.1–8.4
+</footer>
+
+</body>
+</html>

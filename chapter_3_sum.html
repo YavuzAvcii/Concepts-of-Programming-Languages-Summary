@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 3 — Describing Syntax & Semantics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d3a;
+    --accent1: #e8c07d; /* gold */
+    --accent2: #7eb8f7; /* blue */
+    --accent3: #a78bfa; /* purple */
+    --accent4: #6ee7b7; /* teal */
+    --accent5: #f87171; /* red */
+    --text: #dde1ed;
+    --muted: #6b7280;
+    --code-bg: #0a0c10;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 2rem 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent1), transparent);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--accent1);
+    letter-spacing: 0.01em;
+  }
+  header .sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 1.2rem;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card.gold::before   { background: var(--accent1); }
+  .card.blue::before   { background: var(--accent2); }
+  .card.purple::before { background: var(--accent3); }
+  .card.teal::before   { background: var(--accent4); }
+  .card.red::before    { background: var(--accent5); }
+
+  .card.wide { grid-column: 1 / -1; }
+
+  .card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card.gold   h2 { color: var(--accent1); }
+  .card.blue   h2 { color: var(--accent2); }
+  .card.purple h2 { color: var(--accent3); }
+  .card.teal   h2 { color: var(--accent4); }
+  .card.red    h2 { color: var(--accent5); }
+
+  /* ── TERM TABLE ── */
+  .term-table { width: 100%; border-collapse: collapse; }
+  .term-table tr { border-bottom: 1px solid var(--border); }
+  .term-table tr:last-child { border-bottom: none; }
+  .term-table td { padding: 0.45rem 0.5rem; vertical-align: top; }
+  .term-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent2);
+    white-space: nowrap;
+    width: 38%;
+    padding-right: 0.8rem;
+  }
+  .term-table td:last-child { color: #b8c0d4; font-size: 0.85rem; }
+
+  /* ── RULE BLOCK ── */
+  .rule {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #c9d1e8;
+    margin: 0.5rem 0;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+  .rule .nt  { color: var(--accent4); }   /* nonterminal */
+  .rule .t   { color: var(--accent1); }   /* terminal */
+  .rule .op  { color: var(--accent5); }   /* arrow, pipe */
+  .rule .cmt { color: var(--muted); font-style: italic; }
+
+  /* ── PILL TAGS ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .tag {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .tag.gold   { background: rgba(232,192,125,0.12); color: var(--accent1); border: 1px solid rgba(232,192,125,0.25); }
+  .tag.blue   { background: rgba(126,184,247,0.12); color: var(--accent2); border: 1px solid rgba(126,184,247,0.25); }
+  .tag.purple { background: rgba(167,139,250,0.12); color: var(--accent3); border: 1px solid rgba(167,139,250,0.25); }
+  .tag.teal   { background: rgba(110,231,183,0.12); color: var(--accent4); border: 1px solid rgba(110,231,183,0.25); }
+  .tag.red    { background: rgba(248,113,113,0.12); color: var(--accent5); border: 1px solid rgba(248,113,113,0.25); }
+
+  /* ── COMPARE TABLE ── */
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .cmp-table th {
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .cmp-table td {
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: #b8c0d4;
+  }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table td:first-child { color: var(--text); font-weight: 500; }
+
+  /* ── FLOW STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0.5rem; }
+  .step {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    min-width: 1.4rem; height: 1.4rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .step-num.gold   { background: rgba(232,192,125,0.15); color: var(--accent1); border: 1px solid rgba(232,192,125,0.4); }
+  .step-num.blue   { background: rgba(126,184,247,0.15); color: var(--accent2); border: 1px solid rgba(126,184,247,0.4); }
+  .step-num.purple { background: rgba(167,139,250,0.15); color: var(--accent3); border: 1px solid rgba(167,139,250,0.4); }
+  .step-num.teal   { background: rgba(110,231,183,0.15); color: var(--accent4); border: 1px solid rgba(110,231,183,0.4); }
+  .step-text { font-size: 0.84rem; color: #b8c0d4; }
+  .step-text strong { color: var(--text); }
+
+  /* ── AXIOM BLOCK ── */
+  .axiom {
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 6px 6px 0;
+    padding: 0.7rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.79rem;
+    color: #c9d1e8;
+    margin: 0.5rem 0;
+    line-height: 1.9;
+  }
+  .axiom .label {
+    font-size: 0.68rem;
+    color: var(--accent3);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+  }
+  .divider span {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── HIGHLIGHT CALLOUT ── */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.6rem 1rem;
+    font-size: 0.83rem;
+    color: #b8c0d4;
+    margin-top: 0.6rem;
+  }
+  .callout strong { color: var(--accent1); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* stagger */
+  .card:nth-child(1)  { animation-delay: 0.05s; }
+  .card:nth-child(2)  { animation-delay: 0.10s; }
+  .card:nth-child(3)  { animation-delay: 0.15s; }
+  .card:nth-child(4)  { animation-delay: 0.20s; }
+  .card:nth-child(5)  { animation-delay: 0.25s; }
+  .card:nth-child(6)  { animation-delay: 0.30s; }
+  .card:nth-child(7)  { animation-delay: 0.35s; }
+  .card:nth-child(8)  { animation-delay: 0.40s; }
+  .card:nth-child(9)  { animation-delay: 0.45s; }
+  .card:nth-child(10) { animation-delay: 0.50s; }
+  .card:nth-child(11) { animation-delay: 0.55s; }
+  .card:nth-child(12) { animation-delay: 0.60s; }
+  .card:nth-child(13) { animation-delay: 0.65s; }
+  .card:nth-child(14) { animation-delay: 0.70s; }
+
+  @media print {
+    body { background: white; color: black; padding: 1rem; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chapter 3 — Describing Syntax &amp; Semantics</h1>
+  <p class="sub">Concepts of Programming Languages · Quick Reference</p>
+</header>
+
+<div class="grid">
+
+  <!-- ════════════════════════════════════════════════
+       SECTION 1 — FOUNDATIONS
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>§1 · Foundations</span></div>
+
+  <!-- Core Definitions -->
+  <div class="card gold">
+    <h2>📖 Core Definitions</h2>
+    <table class="term-table">
+      <tr><td>Syntax</td><td>The <em>form</em> of expressions, statements, and program units — what is legal to write.</td></tr>
+      <tr><td>Semantics</td><td>The <em>meaning</em> of those expressions, statements, and program units.</td></tr>
+      <tr><td>Sentence / Statement</td><td>A string of characters that belongs to a language.</td></tr>
+      <tr><td>Sentential form</td><td>Any string in a derivation, including the start symbol. May contain nonterminals.</td></tr>
+      <tr><td>Lexeme</td><td>The lowest-level syntactic unit (e.g., <code>index</code>, <code>+</code>, <code>17</code>).</td></tr>
+      <tr><td>Token</td><td>A category of lexemes (e.g., <em>identifier</em>, <em>int_literal</em>, <em>plus_op</em>).</td></tr>
+    </table>
+  </div>
+
+  <!-- Recognition vs Generation -->
+  <div class="card blue">
+    <h2>⚙️ Recognition vs. Generation</h2>
+    <table class="term-table">
+      <tr><td>Recognizer</td><td>Reads a string and <strong>accepts or rejects</strong> it. The <em>syntax analyzer (parser)</em> in a compiler is a recognizer.</td></tr>
+      <tr><td>Generator (Grammar)</td><td>Produces sentences of the language. Easier for humans to read and understand.</td></tr>
+      <tr><td>Key insight</td><td>There is a close mathematical relationship between generators and recognizers for the same language — this discovery drove compiler theory.</td></tr>
+    </table>
+    <div class="callout">A grammar can be <strong>algorithmically converted</strong> to a recognizer (e.g., via <strong>yacc</strong> — Yet Another Compiler Compiler).</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SECTION 2 — BNF & GRAMMARS
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>§2 · BNF / Context-Free Grammars</span></div>
+
+  <!-- BNF Anatomy -->
+  <div class="card teal">
+    <h2>🔬 BNF Anatomy</h2>
+    <table class="term-table">
+      <tr><td>Metalanguage</td><td>A language used to describe another language. BNF is a metalanguage.</td></tr>
+      <tr><td>Nonterminal</td><td>An abstraction / variable in the grammar. Written in <code>&lt;angle brackets&gt;</code>. Can be replaced.</td></tr>
+      <tr><td>Terminal</td><td>A literal lexeme or token. Cannot be replaced further.</td></tr>
+      <tr><td>Production / Rule</td><td><code>LHS → RHS</code>. The LHS nonterminal is defined by its RHS.</td></tr>
+      <tr><td>Start symbol</td><td>The topmost nonterminal (often <code>&lt;program&gt;</code>). Derivation begins here.</td></tr>
+      <tr><td>Derivation</td><td>Sequence of rule applications starting from the start symbol until only terminals remain.</td></tr>
+    </table>
+    <div class="rule">
+<span class="nt">&lt;assign&gt;</span> <span class="op">→</span> <span class="nt">&lt;id&gt;</span> <span class="t">=</span> <span class="nt">&lt;expr&gt;</span>
+<span class="nt">&lt;id&gt;</span>     <span class="op">→</span> <span class="t">A</span> <span class="op">|</span> <span class="t">B</span> <span class="op">|</span> <span class="t">C</span>
+<span class="nt">&lt;expr&gt;</span>   <span class="op">→</span> <span class="nt">&lt;expr&gt;</span> <span class="t">+</span> <span class="nt">&lt;term&gt;</span> <span class="op">|</span> <span class="nt">&lt;term&gt;</span>
+<span class="nt">&lt;term&gt;</span>   <span class="op">→</span> <span class="nt">&lt;term&gt;</span> <span class="t">*</span> <span class="nt">&lt;factor&gt;</span> <span class="op">|</span> <span class="nt">&lt;factor&gt;</span>
+<span class="nt">&lt;factor&gt;</span> <span class="op">→</span> <span class="t">(</span> <span class="nt">&lt;expr&gt;</span> <span class="t">)</span> <span class="op">|</span> <span class="nt">&lt;id&gt;</span>
+    </div>
+    <div class="callout">This unambiguous grammar gives <strong>* higher precedence</strong> than + because * is deeper in the tree (farther from start symbol).</div>
+  </div>
+
+  <!-- Parse Trees -->
+  <div class="card purple">
+    <h2>🌲 Parse Trees</h2>
+    <table class="term-table">
+      <tr><td>Parse tree</td><td>A hierarchical tree showing the syntactic structure of a sentence derived from a grammar.</td></tr>
+      <tr><td>Internal nodes</td><td>Labeled with <strong>nonterminal</strong> symbols.</td></tr>
+      <tr><td>Leaf nodes</td><td>Labeled with <strong>terminal</strong> symbols.</td></tr>
+      <tr><td>Subtree</td><td>Describes one instance of an abstraction in the sentence.</td></tr>
+    </table>
+    <div class="callout">Every derivation with an unambiguous grammar has a <strong>unique parse tree</strong>, but that tree can be represented by both a leftmost and a rightmost derivation.</div>
+    <div class="tags">
+      <span class="tag purple">Leftmost derivation — replace leftmost NT first</span>
+      <span class="tag purple">Rightmost derivation — replace rightmost NT first</span>
+    </div>
+  </div>
+
+  <!-- Ambiguity -->
+  <div class="card red">
+    <h2>⚠️ Ambiguity</h2>
+    <table class="term-table">
+      <tr><td>Ambiguous grammar</td><td>A grammar that generates a sentence with <strong>two or more distinct parse trees</strong>.</td></tr>
+      <tr><td>Why it matters</td><td>Compilers base code generation on parse trees. Multiple trees → undefined meaning.</td></tr>
+      <tr><td>Detection</td><td>If a sentence has more than one leftmost (or rightmost) derivation, the grammar is ambiguous.</td></tr>
+      <tr><td>Classic example</td><td>The <em>dangling else</em> problem: <code>if(a) if(b) S else S</code> — does <code>else</code> match the inner or outer <code>if</code>?</td></tr>
+      <tr><td>Solution</td><td>Rewrite the grammar to be unambiguous using extra nonterminals (e.g., <code>&lt;matched&gt;</code> vs <code>&lt;unmatched&gt;</code> statements), or handle in the compiler.</td></tr>
+    </table>
+  </div>
+
+  <!-- Precedence & Associativity -->
+  <div class="card gold">
+    <h2>🔢 Operator Precedence &amp; Associativity</h2>
+    <table class="term-table">
+      <tr><td>Precedence</td><td>Operators <strong>lower in the parse tree</strong> have higher precedence (evaluated first).</td></tr>
+      <tr><td>Associativity</td><td>Determines evaluation order when two operators have <em>equal</em> precedence.</td></tr>
+      <tr><td>Left associativity</td><td>Achieved with <strong>left recursion</strong>: rule LHS appears at the <em>start</em> of its own RHS.<br><code>&lt;expr&gt; → &lt;expr&gt; + &lt;term&gt;</code></td></tr>
+      <tr><td>Right associativity</td><td>Achieved with <strong>right recursion</strong>: LHS appears at the <em>end</em> of RHS.<br><code>&lt;factor&gt; → &lt;exp&gt; ** &lt;factor&gt;</code></td></tr>
+    </table>
+    <div class="callout"><strong>Warning:</strong> Left recursion prevents some important parsing algorithms from working. The grammar must then be transformed, and associativity enforced by the compiler instead.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SECTION 3 — EBNF
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>§3 · EBNF Extensions</span></div>
+
+  <div class="card blue wide">
+    <h2>📝 EBNF — Three Extensions</h2>
+    <table class="cmp-table">
+      <tr>
+        <th>Extension</th>
+        <th>Symbol</th>
+        <th>Meaning</th>
+        <th>BNF Equivalent</th>
+      </tr>
+      <tr>
+        <td>Optional part</td>
+        <td><code>[ ]</code></td>
+        <td>The enclosed part may appear 0 or 1 times</td>
+        <td>Two rules: one with the part, one without</td>
+      </tr>
+      <tr>
+        <td>Repetition</td>
+        <td><code>{ }</code></td>
+        <td>The enclosed part may repeat 0 or more times (replaces recursion for lists)</td>
+        <td>Recursive rule with two alternatives</td>
+      </tr>
+      <tr>
+        <td>Multiple choice</td>
+        <td><code>( a | b | c )</code></td>
+        <td>Choose exactly one option from the group</td>
+        <td>Three separate rules joined by <code>|</code></td>
+      </tr>
+    </table>
+    <div class="rule" style="margin-top:0.8rem">
+<span class="cmt">-- BNF (verbose, recursive):</span>
+<span class="nt">&lt;expr&gt;</span> <span class="op">→</span> <span class="nt">&lt;expr&gt;</span> <span class="t">+</span> <span class="nt">&lt;term&gt;</span> <span class="op">|</span> <span class="nt">&lt;expr&gt;</span> <span class="t">-</span> <span class="nt">&lt;term&gt;</span> <span class="op">|</span> <span class="nt">&lt;term&gt;</span>
+
+<span class="cmt">-- EBNF (compact, iterative):</span>
+<span class="nt">&lt;expr&gt;</span> <span class="op">→</span> <span class="nt">&lt;term&gt;</span> <span class="t">{(</span><span class="op">+</span><span class="t"> | </span><span class="op">-</span><span class="t">) &lt;term&gt;}</span>
+    </div>
+    <div class="callout"><strong>Note:</strong> EBNF does <em>not</em> increase the descriptive power of BNF — it only improves readability and writability. Also, the EBNF repetition form does not explicitly encode left associativity; the parser must enforce it.</div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SECTION 4 — ATTRIBUTE GRAMMARS
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>§4 · Attribute Grammars</span></div>
+
+  <!-- Static Semantics -->
+  <div class="card teal">
+    <h2>🏷️ Static Semantics</h2>
+    <table class="term-table">
+      <tr><td>Static semantics</td><td>Language rules about <em>legal form</em> that are checked at compile time but are hard or impossible to describe in BNF.</td></tr>
+      <tr><td>Hard in BNF</td><td>Type compatibility rules (e.g., can't assign float to int in Java).</td></tr>
+      <tr><td>Impossible in BNF</td><td>"All variables must be declared before use."</td></tr>
+      <tr><td>Dynamic semantics</td><td>The <em>meaning</em> of constructs during execution — covered in §5.</td></tr>
+    </table>
+  </div>
+
+  <!-- Attribute Grammar Components -->
+  <div class="card purple">
+    <h2>🧩 Attribute Grammar Components</h2>
+    <table class="term-table">
+      <tr><td>Attribute</td><td>A value associated with a grammar symbol (like a variable). Set A(X) = S(X) ∪ I(X).</td></tr>
+      <tr><td>Synthesized attr.</td><td>Computed from a node's <strong>children</strong>. Information flows <strong>up</strong> the tree.</td></tr>
+      <tr><td>Inherited attr.</td><td>Computed from a node's <strong>parent and siblings</strong>. Information flows <strong>down/across</strong>.</td></tr>
+      <tr><td>Intrinsic attr.</td><td>Synthesized attributes of <strong>leaf nodes</strong> whose values come from <em>outside</em> the parse tree (e.g., the symbol table).</td></tr>
+      <tr><td>Semantic function</td><td>Computes attribute values. Attached to grammar rules.</td></tr>
+      <tr><td>Predicate function</td><td>A Boolean check on attributes. If false → static semantic violation.</td></tr>
+      <tr><td>Fully attributed</td><td>A parse tree where all attribute values have been computed. Process called <strong>decorating</strong>.</td></tr>
+    </table>
+  </div>
+
+  <!-- Attribute Grammar Example -->
+  <div class="card gold wide">
+    <h2>📌 Attribute Grammar Example — Type Checking</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.4rem;">Grammar rules:</p>
+        <div class="rule">
+<span class="nt">&lt;assign&gt;</span> <span class="op">→</span> <span class="nt">&lt;var&gt;</span> <span class="t">=</span> <span class="nt">&lt;expr&gt;</span>
+<span class="nt">&lt;expr&gt;</span>   <span class="op">→</span> <span class="nt">&lt;var&gt;</span> <span class="t">+</span> <span class="nt">&lt;var&gt;</span> <span class="op">|</span> <span class="nt">&lt;var&gt;</span>
+<span class="nt">&lt;var&gt;</span>    <span class="op">→</span> <span class="t">A</span> <span class="op">|</span> <span class="t">B</span> <span class="op">|</span> <span class="t">C</span></div>
+        <p style="font-size:0.82rem;color:var(--muted);margin:0.6rem 0 0.3rem;">Attributes:</p>
+        <table class="term-table">
+          <tr><td>actual_type</td><td><strong>Synthesized</strong> on &lt;var&gt; and &lt;expr&gt;. Stores int or real.</td></tr>
+          <tr><td>expected_type</td><td><strong>Inherited</strong> on &lt;expr&gt;. Set from the LHS variable's type.</td></tr>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.4rem;">Semantic &amp; predicate rules:</p>
+        <div class="rule">
+<span class="cmt">Rule 1 (assign):</span>
+  &lt;expr&gt;.expected_type ← &lt;var&gt;.actual_type
+
+<span class="cmt">Rule 2 (expr → var+var):</span>
+  &lt;expr&gt;.actual_type ←
+    if both vars are int → int
+    else → real
+  Predicate: actual_type == expected_type
+
+<span class="cmt">Rule 4 (var → A|B|C):</span>
+  &lt;var&gt;.actual_type ← look-up(var.string)
+        </div>
+        <div class="callout" style="margin-top:0.5rem">Evaluation order must respect dependencies. If both inherited and synthesized attributes exist, a <strong>dependency graph</strong> is needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SECTION 5 — DYNAMIC SEMANTICS
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>§5 · Dynamic Semantics — Three Approaches</span></div>
+
+  <!-- Overview Compare -->
+  <div class="card blue wide">
+    <h2>🔭 Overview — Three Semantic Description Methods</h2>
+    <table class="cmp-table">
+      <tr>
+        <th>Method</th>
+        <th>Based on</th>
+        <th>Core idea</th>
+        <th>Useful for</th>
+        <th>Weakness</th>
+      </tr>
+      <tr>
+        <td>Operational</td>
+        <td>Lower-level programming language / virtual machine</td>
+        <td>Describe meaning by showing what happens when you run it on an idealized machine</td>
+        <td>Language users, informal descriptions in textbooks</td>
+        <td>Depends on another language; can become circular. Complex like VDL for PL/I = useless.</td>
+      </tr>
+      <tr>
+        <td>Denotational</td>
+        <td>Recursive function theory (mathematics)</td>
+        <td>Map language constructs to mathematical objects (functions/sets)</td>
+        <td>Rigorous language specification; most widely known formal method</td>
+        <td>Complex, hard to write for real languages; of little use to ordinary users</td>
+      </tr>
+      <tr>
+        <td>Axiomatic</td>
+        <td>Mathematical logic / predicate calculus</td>
+        <td>Define what can be <em>proven</em> about a program using pre/postconditions</td>
+        <td>Proving program correctness; reasoning about programs during construction</td>
+        <td>Very difficult for complex statements (loops); limited practical use for compilers</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Operational Semantics -->
+  <div class="card teal">
+    <h2>⚙️ Operational Semantics</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num teal">1</div>
+        <div class="step-text">Design an <strong>intermediate language</strong> whose every construct has an obvious, unambiguous meaning.</div>
+      </div>
+      <div class="step">
+        <div class="step-num teal">2</div>
+        <div class="step-text">Build a <strong>virtual machine (interpreter)</strong> for that language.</div>
+      </div>
+      <div class="step">
+        <div class="step-num teal">3</div>
+        <div class="step-text">Describe target language constructs by translating them into the intermediate language and running them.</div>
+      </div>
+    </div>
+    <div class="rule" style="margin-top:0.8rem">
+<span class="cmt">C for loop → operational meaning:</span>
+for (expr1; expr2; expr3) { ... }
+
+expr1;
+loop: if expr2 == 0 goto out
+  ...body...
+  expr3;
+  goto loop
+out: ...</div>
+    <div class="tags">
+      <span class="tag teal">Natural — final result only</span>
+      <span class="tag teal">Structural — full step-by-step trace</span>
+    </div>
+  </div>
+
+  <!-- Denotational Semantics -->
+  <div class="card purple">
+    <h2>📐 Denotational Semantics</h2>
+    <table class="term-table">
+      <tr><td>Syntactic domain</td><td>The set of syntactic structures being mapped (input to mapping function).</td></tr>
+      <tr><td>Semantic domain</td><td>The mathematical objects that represent meaning (output).</td></tr>
+      <tr><td>State s</td><td>A set of ordered pairs: s = {&lt;i₁,v₁&gt;, &lt;i₂,v₂&gt;, …}. Represents current variable values.</td></tr>
+      <tr><td>VARMAP(i, s)</td><td>Returns the value of variable i in state s.</td></tr>
+    </table>
+    <div class="rule" style="margin-top:0.7rem">
+<span class="cmt">Binary number example (Mbin maps syntax → decimal):</span>
+Mbin('0') = 0
+Mbin('1') = 1
+Mbin(&lt;bin_num&gt; '0') = 2 * Mbin(&lt;bin_num&gt;)
+Mbin(&lt;bin_num&gt; '1') = 2 * Mbin(&lt;bin_num&gt;) + 1
+
+<span class="cmt">Assignment (Ma maps state → state):</span>
+Ma(x = E, s) = s' where x gets Me(E, s)
+    </div>
+    <div class="callout">Key difference from operational: state changes defined by <strong>mathematical functions</strong>, not coded algorithms. Does <em>not</em> model step-by-step execution.</div>
+  </div>
+
+  <!-- Axiomatic Semantics -->
+  <div class="card red">
+    <h2>✅ Axiomatic Semantics — Key Concepts</h2>
+    <table class="term-table">
+      <tr><td>Assertion / predicate</td><td>A logical expression about program variables. Written in {braces}.</td></tr>
+      <tr><td>Precondition</td><td>Assertion that must hold <strong>before</strong> a statement executes.</td></tr>
+      <tr><td>Postcondition</td><td>Assertion that holds <strong>after</strong> a statement executes.</td></tr>
+      <tr><td>Weakest precondition</td><td>The <em>least restrictive</em> precondition that guarantees the postcondition. Written wp(S, Q).</td></tr>
+      <tr><td>Axiom</td><td>A logical statement assumed true (inference rule with no antecedent).</td></tr>
+      <tr><td>Inference rule</td><td>If S₁…Sₙ are true, then S can be inferred. Used for sequences, selections, loops.</td></tr>
+    </table>
+  </div>
+
+  <!-- Axiomatic Rules -->
+  <div class="card gold wide">
+    <h2>📋 Axiomatic Rules Summary</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+      <div>
+        <div class="axiom">
+          <div class="label">Assignment Axiom</div>
+          {Q<sup>x→E</sup>} x = E {Q}
+          <br><br>
+          Weakest precondition = Q with all x replaced by E
+          <br><br>
+          Example: a = 2*y - 3  {a > 25}
+          → substitute: 2*y - 3 > 25 → y > 14
+          → WP = {y > 14}
+        </div>
+        <div class="axiom" style="margin-top:0.7rem">
+          <div class="label">Rule of Consequence</div>
+          {P} S {Q},  P' ⇒ P,  Q ⇒ Q'
+          ─────────────────────────────
+              {P'} S {Q'}
+          <br><br>
+          Postcondition can be weakened.
+          Precondition can be strengthened.
+        </div>
+      </div>
+      <div>
+        <div class="axiom">
+          <div class="label">Sequence Rule</div>
+          {P1} S1 {P2},  {P2} S2 {P3}
+          ─────────────────────────────
+              {P1} S1; S2 {P3}
+          <br><br>
+          Work backwards: compute WP of S2 first,
+          then use it as postcondition for S1.
+        </div>
+        <div class="axiom" style="margin-top:0.7rem">
+          <div class="label">While Loop Rule</div>
+          {I and B} S {I}
+          ───────────────────────────────────────
+          {I} while B do S end {I and (not B)}
+          <br><br>
+          I = loop invariant
+          Must satisfy all 4 criteria →
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loop Invariant -->
+  <div class="card purple">
+    <h2>🔄 Loop Invariant — 4 Criteria</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num purple">1</div>
+        <div class="step-text"><strong>P ⇒ I</strong> — The precondition implies the invariant (invariant is true before loop starts).</div>
+      </div>
+      <div class="step">
+        <div class="step-num purple">2</div>
+        <div class="step-text"><strong>{I and B} S {I}</strong> — Invariant is preserved by the loop body (stays true through each iteration).</div>
+      </div>
+      <div class="step">
+        <div class="step-num purple">3</div>
+        <div class="step-text"><strong>(I and not B) ⇒ Q</strong> — Invariant + exit condition together imply the postcondition.</div>
+      </div>
+      <div class="step">
+        <div class="step-num purple">4</div>
+        <div class="step-text"><strong>Loop terminates</strong> — Without this, we only have <em>partial correctness</em>. With it: <em>total correctness</em>.</div>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>How to find I:</strong> Compute wp(body, Q) for 0, 1, 2, 3 iterations. Look for the pattern. The invariant is usually a generalized version of those preconditions.
+    </div>
+  </div>
+
+  <!-- Selection -->
+  <div class="card blue">
+    <h2>🔀 Selection (if-else) Rule</h2>
+    <div class="axiom">
+      <div class="label">Inference Rule for if B then S1 else S2</div>
+      {B and P} S1 {Q},  {(not B) and P} S2 {Q}
+      ─────────────────────────────────────────────
+            {P} if B then S1 else S2 {Q}
+    </div>
+    <div class="callout" style="margin-top:0.6rem">
+      Both branches must be proven. Find the precondition of each branch separately. If they differ, use the <strong>rule of consequence</strong> to strengthen the weaker one to match.
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       QUICK LOOKUP
+       ════════════════════════════════════════════════ -->
+  <div class="divider"><span>Quick Lookup</span></div>
+
+  <div class="card gold wide">
+    <h2>⚡ Common Exam Pitfalls &amp; Key Facts</h2>
+    <table class="cmp-table">
+      <tr>
+        <th>Topic</th>
+        <th>What to remember</th>
+      </tr>
+      <tr><td>Syntax vs Semantics</td><td>Syntax = form (what you can write). Semantics = meaning (what it does). Well-designed language: semantics follows directly from syntax.</td></tr>
+      <tr><td>BNF vs EBNF</td><td>EBNF adds <code>[]</code>, <code>{}</code>, <code>(a|b)</code>. Same expressive power as BNF — only readability improves.</td></tr>
+      <tr><td>Precedence in grammar</td><td>Higher precedence → operator appears lower in parse tree / farther from start symbol.</td></tr>
+      <tr><td>Left vs right recursion</td><td>Left recursive rule = left associative. Right recursive = right associative. Exponentiation is usually right associative.</td></tr>
+      <tr><td>Dangling else</td><td>Classic ambiguity. Resolved by matching <code>else</code> with nearest preceding unmatched <code>if</code>. Requires separate matched/unmatched nonterminals in grammar.</td></tr>
+      <tr><td>Synthesized vs Inherited</td><td>Synthesized flows UP (from children). Inherited flows DOWN (from parent/siblings). Both = need dependency graph for eval order.</td></tr>
+      <tr><td>Assignment axiom</td><td>Compute WP by substituting the RHS expression for the LHS variable in the postcondition.</td></tr>
+      <tr><td>Partial vs Total correctness</td><td>Partial = loop does the right thing IF it terminates. Total = correct AND terminates.</td></tr>
+      <tr><td>Most widely known formal semantics</td><td>Denotational semantics.</td></tr>
+      <tr><td>First formal use of operational semantics</td><td>VDL (Vienna Definition Language) for PL/I — turned out too complex to be useful.</td></tr>
+      <tr><td>Axiomatic semantics devised by</td><td>Floyd (1967), further developed by Hoare (1969). Based on predicate calculus / formal logic.</td></tr>
+      <tr><td>Denotational semantics based on</td><td>Recursive function theory (mathematics). Scott & Strachey (1971).</td></tr>
+    </table>
+  </div>
+
+</div><!-- end grid -->
+
+</body>
+</html>

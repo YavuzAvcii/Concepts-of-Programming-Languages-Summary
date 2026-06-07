@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 4 — Lexical & Syntax Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --border: #252a35;
+    --accent: #e8c547;
+    --accent2: #5de3c2;
+    --accent3: #e85d75;
+    --text: #dde3ee;
+    --muted: #7a8299;
+    --code-bg: #1a1e28;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 0 0 80px;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 60px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -60px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,197,71,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .chapter-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(120deg, #dde3ee 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 560px;
+  }
+
+  .toc {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .toc a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid rgba(93,227,194,0.25);
+    border-radius: 3px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .toc a:hover {
+    background: rgba(93,227,194,0.1);
+    border-color: var(--accent2);
+  }
+
+  main { padding: 0 60px; max-width: 1100px; margin: 0 auto; }
+
+  section { margin-top: 64px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .section-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(232,197,71,0.1);
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+    margin-bottom: 28px;
+  }
+
+  /* CONCEPT CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--accent); }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .card p {
+    font-size: 13.5px;
+    color: #b0bace;
+    line-height: 1.6;
+  }
+
+  /* MAIN TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 28px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead tr {
+    background: rgba(232,197,71,0.07);
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 14px 20px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  td {
+    padding: 13px 20px;
+    font-size: 13.5px;
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  td:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  td strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  td em {
+    color: var(--muted);
+    font-style: normal;
+    font-size: 12.5px;
+  }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+
+  .code-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #c5d0e6;
+  }
+
+  .kw { color: #e85d75; }
+  .fn { color: #79c0ff; }
+  .cm { color: #4d566b; }
+  .str { color: #a5d6ff; }
+  .num { color: var(--accent); }
+
+  /* COMPARISON TABLE */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 28px;
+  }
+
+  .compare-table th {
+    background: var(--surface);
+    padding: 12px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table th.top { color: var(--accent2); }
+  .compare-table th.bottom { color: var(--accent3); }
+
+  .compare-table td {
+    border: 1px solid var(--border);
+    padding: 11px 20px;
+    font-size: 13px;
+    background: var(--surface);
+    color: #b0bace;
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .flow-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .flow-box.highlight {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .flow-arrow {
+    color: var(--muted);
+    padding: 0 10px;
+    font-size: 16px;
+  }
+
+  /* CALL-OUT BOX */
+  .callout {
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    font-size: 13.5px;
+  }
+
+  .callout.warn {
+    border-color: rgba(232,93,117,0.3);
+    background: rgba(232,93,117,0.05);
+    color: #e8a3b0;
+  }
+
+  .callout.tip {
+    border-color: rgba(93,227,194,0.3);
+    background: rgba(93,227,194,0.05);
+    color: #9de8d8;
+  }
+
+  .callout.note {
+    border-color: rgba(232,197,71,0.3);
+    background: rgba(232,197,71,0.05);
+    color: #e8d89a;
+  }
+
+  .callout-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  /* LR TRACE TABLE */
+  .trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 28px;
+  }
+
+  .trace-table th {
+    background: rgba(93,227,194,0.08);
+    color: var(--accent2);
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .trace-table td {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #b0bace;
+  }
+
+  .trace-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag-shift { color: var(--accent2); }
+  .tag-reduce { color: var(--accent3); }
+  .tag-accept { color: #6ddb6d; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .badge.ll { background: rgba(93,227,194,0.15); color: var(--accent2); }
+  .badge.lr { background: rgba(232,93,117,0.15); color: var(--accent3); }
+  .badge.ebnf { background: rgba(232,197,71,0.15); color: var(--accent); }
+
+  @media (max-width: 768px) {
+    header { padding: 36px 24px 28px; }
+    main { padding: 0 24px; }
+    h1 { font-size: 28px; }
+    .flow { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="chapter-tag">Concepts of Programming Languages · Chapter 4</div>
+  <h1>Lexical &amp; Syntax Analysis</h1>
+  <p class="subtitle">A complete study guide covering lexical analysis, top-down parsing, recursive-descent, and LR bottom-up parsing.</p>
+  <div class="toc">
+    <a href="#sec-why">Why Separate?</a>
+    <a href="#sec-lexical">Lexical Analysis</a>
+    <a href="#sec-parsing">Parsing Problem</a>
+    <a href="#sec-recursive">Recursive-Descent</a>
+    <a href="#sec-ll">LL Grammar</a>
+    <a href="#sec-bottomup">Bottom-Up / LR</a>
+    <a href="#sec-review">Review Q&amp;A</a>
+  </div>
+</header>
+
+<main>
+
+<!-- BIG PICTURE FLOW -->
+<section id="sec-why">
+  <div class="section-header">
+    <span class="section-num">4.1</span>
+    <h2>The Big Picture</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="flow">
+    <div class="flow-box">Source Code<br><em style="color:var(--muted);font-size:11px">character stream</em></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box highlight">Lexical Analyzer<br><em style="color:var(--muted);font-size:11px">lexemes + tokens</em></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box highlight">Syntax Analyzer<br><em style="color:var(--muted);font-size:11px">parse tree</em></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Semantic Analyzer<br><em style="color:var(--muted);font-size:11px">type checking…</em></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Code Generation</div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Why Separate Lexical from Syntax?</div>
+      <p><strong>Simplicity:</strong> Lexical analysis is simpler — handle it separately so the syntax analyzer is smaller and cleaner.<br><br>
+      <strong>Efficiency:</strong> Lexical analysis is a big chunk of compile time; separating it lets you optimize it specifically.<br><br>
+      <strong>Portability:</strong> Lexical analyzers deal with platform-specific file I/O. Syntax analyzers can be platform-independent.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Why Use Formal Grammars (BNF)?</div>
+      <p>1. BNF is clear and concise for both humans and software.<br><br>
+      2. The BNF description can be used as the <em>direct basis</em> for writing a parser.<br><br>
+      3. Implementations based on BNF are easier to maintain (modularity).</p>
+    </div>
+  </div>
+</section>
+
+<!-- LEXICAL ANALYSIS -->
+<section id="sec-lexical">
+  <div class="section-header">
+    <span class="section-num">4.2</span>
+    <h2>Lexical Analysis</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Term</th>
+          <th>Definition</th>
+          <th>Example from: result = oldsum - value / 100;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lexeme</td>
+          <td><strong>The actual character string</strong> extracted from the source code. The raw text.</td>
+          <td><em>result, =, oldsum, -, value, /, 100, ;</em></td>
+        </tr>
+        <tr>
+          <td>Token</td>
+          <td><strong>The category/type code</strong> assigned to a lexeme. Usually an integer constant.</td>
+          <td><em>IDENT(11), ASSIGN_OP(20), IDENT(11), SUB_OP(22)…</em></td>
+        </tr>
+        <tr>
+          <td>Symbol Table</td>
+          <td><strong>Database of names</strong> built by the lexical analyzer. Stores user-defined names and their attributes (e.g., variable type).</td>
+          <td><em>result → {type: float}, oldsum → {type: int}…</em></td>
+        </tr>
+        <tr>
+          <td>Character Class</td>
+          <td><strong>A group of characters</strong> treated the same way. Used to simplify state diagrams (e.g., LETTER covers all 52 letters, DIGIT covers 0–9).</td>
+          <td><em>LETTER, DIGIT, UNKNOWN</em></td>
+        </tr>
+        <tr>
+          <td>State Diagram</td>
+          <td><strong>A directed graph</strong> (finite automaton) where nodes = states, arcs = transitions on input characters. Describes how tokens are recognized.</td>
+          <td><em>Start → (LETTER) → collecting name → (non-LETTER/DIGIT) → return IDENT</em></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin-bottom:14px;color:var(--accent2);">3 Ways to Build a Lexical Analyzer</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">1 — Software Tool (e.g., lex)</div>
+      <p>Write formal token descriptions using regular expressions. Feed them into a tool like <em>lex</em> (UNIX) which auto-generates the analyzer. Fastest to build.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">2 — State Diagram → Code</div>
+      <p>Design a state transition diagram by hand, then write code that implements it directly. This is what the textbook example (front.c) does.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">3 — State Diagram → Table</div>
+      <p>Design a state transition diagram by hand, then build a <em>table</em> that drives a generic interpreter. More flexible to modify.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-label">Key helper functions in a lexical analyzer (front.c)</div>
+    <pre>
+<span class="fn">getChar()</span>   — reads next char, sets nextChar and charClass (LETTER / DIGIT / UNKNOWN / EOF)
+<span class="fn">addChar()</span>   — appends nextChar to the lexeme[] buffer
+<span class="fn">getNonBlank()</span> — skips whitespace by calling getChar() in a loop
+<span class="fn">lookup(ch)</span>  — maps single-char operators/parens to their token codes
+
+<span class="cm">/* Token codes defined as named constants (NOT raw numbers) for readability */</span>
+<span class="kw">#define</span> INT_LIT     <span class="num">10</span>
+<span class="kw">#define</span> IDENT       <span class="num">11</span>
+<span class="kw">#define</span> ADD_OP      <span class="num">21</span>
+<span class="kw">#define</span> LEFT_PAREN  <span class="num">25</span>
+    </pre>
+  </div>
+
+  <div class="callout note">
+    <div class="callout-title">⚡ Key Point</div>
+    Reserved words and identifiers share the same pattern. The lexer recognizes both as IDENT, then uses a <strong>table lookup</strong> to check if the name is a reserved word. This avoids needing a huge state diagram.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:15px;margin:20px 0 12px;color:var(--text);">Example: Lexer output for <code style="color:var(--accent)">(sum + 47) / total</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Token Code</th><th>Lexeme</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>25</td><td>(</td><td>LEFT_PAREN</td></tr>
+        <tr><td>11</td><td>sum</td><td>IDENT</td></tr>
+        <tr><td>21</td><td>+</td><td>ADD_OP</td></tr>
+        <tr><td>10</td><td>47</td><td>INT_LIT</td></tr>
+        <tr><td>26</td><td>)</td><td>RIGHT_PAREN</td></tr>
+        <tr><td>24</td><td>/</td><td>DIV_OP</td></tr>
+        <tr><td>11</td><td>total</td><td>IDENT</td></tr>
+        <tr><td>-1</td><td>EOF</td><td>End of Input</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PARSING PROBLEM -->
+<section id="sec-parsing">
+  <div class="section-header">
+    <span class="section-num">4.3</span>
+    <h2>The Parsing Problem</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">2 Goals of a Parser</div>
+      <p>1. <strong>Detect syntax errors</strong> and recover (so parsing can continue and find more errors).<br><br>
+      2. <strong>Produce a parse tree</strong> (or trace of one) for syntactically correct input. This drives translation.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Parsing Complexity</div>
+      <p>A parser that works for <em>any</em> unambiguous grammar is O(n³) — impractically slow.<br><br>
+      Parsers used in real compilers work on a <em>subset</em> of grammars and achieve <strong>O(n)</strong> — linear time. Speed is traded for some grammar restriction.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin:8px 0 16px;color:var(--accent2);">Top-Down vs Bottom-Up</h3>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th style="width:20%">Property</th>
+        <th class="top">Top-Down <span class="badge ll">LL</span></th>
+        <th class="bottom">Bottom-Up <span class="badge lr">LR</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Tree direction</td>
+        <td>Root → Leaves (top to bottom)</td>
+        <td>Leaves → Root (bottom to top)</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Derivation type</td>
+        <td>Leftmost derivation</td>
+        <td>Reverse of rightmost derivation</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Scan direction</td>
+        <td>Left to right</td>
+        <td>Left to right</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Implementation</td>
+        <td>Recursive-descent (coded directly from grammar)</td>
+        <td>LR parser with ACTION/GOTO tables</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Left recursion</td>
+        <td>❌ NOT allowed — causes infinite recursion</td>
+        <td>✅ Allowed (handles it fine)</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Grammar power</td>
+        <td>Works on a subset of grammars</td>
+        <td>LR grammars are a <em>superset</em> of LL grammars</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Parsing task</td>
+        <td>Choose which RHS to expand for leftmost nonterminal</td>
+        <td>Find the <em>handle</em> in the current sentential form</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout tip">
+    <div class="callout-title">LL vs LR naming</div>
+    <strong>LL:</strong> Left-to-right scan, Leftmost derivation. <strong>LR:</strong> Left-to-right scan, Rightmost derivation (reversed). The first letter always means left-to-right scan.
+  </div>
+</section>
+
+<!-- RECURSIVE DESCENT -->
+<section id="sec-recursive">
+  <div class="section-header">
+    <span class="section-num">4.4</span>
+    <h2>Recursive-Descent Parsing</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="callout note">
+    <div class="callout-title">Core Idea</div>
+    One subprogram (function) per nonterminal. Each function parses whatever its nonterminal generates. Functions call each other recursively, mirroring the recursive structure of the grammar. Based directly on EBNF rules.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>EBNF Rule</th>
+          <th>Parsing Function Behavior</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>&lt;expr&gt; → &lt;term&gt; {(+ | -) &lt;term&gt;}</td>
+          <td>Call <code>term()</code>, then loop while next token is + or −: call <code>lex()</code> to consume the operator, call <code>term()</code> again.</td>
+        </tr>
+        <tr>
+          <td>&lt;term&gt; → &lt;factor&gt; {(* | /) &lt;factor&gt;}</td>
+          <td>Call <code>factor()</code>, then loop while next token is * or /: call <code>lex()</code>, call <code>factor()</code> again.</td>
+        </tr>
+        <tr>
+          <td>&lt;factor&gt; → id | int_constant | ( &lt;expr&gt; )</td>
+          <td>If next token is IDENT or INT_LIT: call <code>lex()</code>. If next token is LEFT_PAREN: call <code>lex()</code>, call <code>expr()</code>, check for RIGHT_PAREN. Otherwise: <code>error()</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-label">Recursive-descent function for &lt;expr&gt; (C)</div>
+    <pre><span class="kw">void</span> <span class="fn">expr</span>() {
+    <span class="fn">term</span>();   <span class="cm">/* parse first term */</span>
+    <span class="kw">while</span> (nextToken == ADD_OP || nextToken == SUB_OP) {
+        <span class="fn">lex</span>();   <span class="cm">/* consume + or - */</span>
+        <span class="fn">term</span>(); <span class="cm">/* parse next term */</span>
+    }
+}
+<span class="cm">/* Convention: when each function returns, nextToken holds
+   the NEXT unused token. Every function starts assuming
+   nextToken is already loaded. */</span></pre>
+  </div>
+</section>
+
+<!-- LL GRAMMAR -->
+<section id="sec-ll">
+  <div class="section-header">
+    <span class="section-num">4.4.2</span>
+    <h2>LL Grammar Restrictions</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent3)">Problem 1 — Left Recursion</div>
+      <p><strong>What it is:</strong> A rule where a nonterminal derives itself as the first symbol.<br><br>
+      <code style="color:var(--accent);font-size:12px">A → A + B</code> (direct left recursion)<br>
+      <code style="color:var(--accent);font-size:12px">A → Ba, B → Ab</code> (indirect left recursion)<br><br>
+      <strong>Why it fails:</strong> The function for A immediately calls itself → infinite recursion / stack overflow.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--accent3)">Problem 2 — Pairwise Disjointness Failure</div>
+      <p><strong>What it is:</strong> When two or more RHSs of the same nonterminal can begin with the same terminal symbol.<br><br>
+      <code style="color:var(--accent);font-size:12px">&lt;var&gt; → identifier | identifier [&lt;expr&gt;]</code><br><br>
+      <strong>Why it fails:</strong> The parser can't decide which RHS to use just by looking at the next token.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin:8px 0 14px;color:var(--accent2);">Fixes</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>Fix</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Direct left recursion</td>
+          <td><strong>Eliminate left recursion:</strong> Replace A→Aα|β with A→βA′ and A′→αA′|ε</td>
+          <td>E→E+T|T becomes: <br><code style="font-size:11px">E→TE′, E′→+TE′|ε</code></td>
+        </tr>
+        <tr>
+          <td>Pairwise disjointness failure</td>
+          <td><strong>Left factoring:</strong> Pull out the common prefix into a new rule</td>
+          <td><code style="font-size:11px">&lt;var&gt; → identifier &lt;new&gt;</code><br><code style="font-size:11px">&lt;new&gt; → ε | [&lt;expr&gt;]</code></td>
+        </tr>
+        <tr>
+          <td>Pairwise disjointness failure</td>
+          <td><strong>EBNF extension:</strong> Use optional brackets to eliminate the problem without a new rule</td>
+          <td><code style="font-size:11px">&lt;var&gt; → identifier [[&lt;expr&gt;]]</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout note">
+    <div class="callout-title">FIRST Sets &amp; Pairwise Disjointness Test</div>
+    <strong>FIRST(α)</strong> = the set of terminal symbols that can appear as the first symbol of any string derived from α.<br><br>
+    <strong>The test:</strong> For each nonterminal A with multiple RHSs, for every pair of rules A→αᵢ and A→αⱼ:<br>
+    <code style="color:var(--accent)">FIRST(αᵢ) ∩ FIRST(αⱼ) = ∅</code> (empty set — no overlap allowed)<br><br>
+    Example: A→aB | bAb | Bb, B→cB|d → FIRST sets are {a}, {b}, {c,d} → disjoint ✅ PASSES
+  </div>
+</section>
+
+<!-- BOTTOM-UP / LR -->
+<section id="sec-bottomup">
+  <div class="section-header">
+    <span class="section-num">4.5</span>
+    <h2>Bottom-Up Parsing &amp; LR</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Handle</div>
+      <p>The <strong>specific substring</strong> of the current right sentential form that must be reduced to its LHS nonterminal to get the previous sentential form in the rightmost derivation.<br><br>
+      The handle is <strong>always unique</strong> in any right sentential form. It equals the <strong>leftmost simple phrase</strong>.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Phrase</div>
+      <p>A string derived from a single internal node in the parse tree (one or more derivation steps from that node).<br><br>
+      Multiple phrases can exist in one sentential form — one per internal node.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Simple Phrase</div>
+      <p>A phrase derived in <strong>exactly one</strong> derivation step. Always corresponds directly to a grammar RHS.<br><br>
+      The leftmost simple phrase = the handle.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin:8px 0 14px;color:var(--accent2);">Shift-Reduce Actions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Action</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Shift</td>
+          <td>Push the next input token onto the parse stack (along with a state symbol)</td>
+        </tr>
+        <tr>
+          <td>Reduce</td>
+          <td>The handle is on top of the stack. Pop it and push its LHS nonterminal. Use GOTO table to determine the new state.</td>
+        </tr>
+        <tr>
+          <td>Accept</td>
+          <td>Parse is complete, no errors. Input was valid.</td>
+        </tr>
+        <tr>
+          <td>Error</td>
+          <td>Syntax error detected. Call error-handling routine.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin:20px 0 14px;color:var(--accent2);">LR Parser Tables</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">ACTION Table</div>
+      <p><strong>Rows:</strong> State symbols.<br>
+      <strong>Columns:</strong> Terminal symbols (tokens).<br><br>
+      Given current state + next input token → tells the parser to: <em>Shift(Sn)</em>, <em>Reduce(Rn)</em>, <em>Accept</em>, or <em>Error</em>.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">GOTO Table</div>
+      <p><strong>Rows:</strong> State symbols.<br>
+      <strong>Columns:</strong> Nonterminal symbols.<br><br>
+      Used <em>after a reduction</em> to determine which new state to push onto the stack. Row = state exposed after popping the handle. Column = LHS of the rule just reduced.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-title">Knuth's Insight</div>
+    The state symbol on top of the parse stack contains <em>all</em> the relevant information from the entire parse history. No matter how long the stack is, one state symbol summarizes what matters — keeping the number of distinct states small and manageable.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:16px;margin:20px 0 14px;color:var(--accent2);">Advantages &amp; Disadvantages of LR Parsing</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title" style="color:#6ddb6d">Advantages</div>
+      <p>1. Can be built for <em>all</em> programming languages.<br><br>
+      2. Detects syntax errors as soon as possible during left-to-right scan.<br><br>
+      3. LR grammars are a <strong>proper superset</strong> of LL grammars — handles more grammars, including many left-recursive ones.</p>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--accent3)">Disadvantage</div>
+      <p>The parsing table is <strong>very hard to construct by hand</strong> for a real programming language.<br><br>
+      In practice, tools like <em>yacc</em> (Yet Another Compiler Compiler) generate the tables automatically from the grammar.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:15px;margin:20px 0 12px;color:var(--text);">LR Parse Trace Example: <code style="color:var(--accent)">id + id * id</code></h3>
+
+  <table class="trace-table">
+    <thead>
+      <tr>
+        <th>Parse Stack</th>
+        <th>Input</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>id + id * id $</td><td class="tag-shift">Shift S5 (id)</td></tr>
+      <tr><td>0 id 5</td><td>+ id * id $</td><td class="tag-reduce">Reduce R6: F→id</td></tr>
+      <tr><td>0 F 3</td><td>+ id * id $</td><td class="tag-reduce">Reduce R4: T→F</td></tr>
+      <tr><td>0 T 2</td><td>+ id * id $</td><td class="tag-reduce">Reduce R2: E→T</td></tr>
+      <tr><td>0 E 1</td><td>+ id * id $</td><td class="tag-shift">Shift S6 (+)</td></tr>
+      <tr><td>0 E 1 + 6</td><td>id * id $</td><td class="tag-shift">Shift S5 (id)</td></tr>
+      <tr><td>0 E 1 + 6 id 5</td><td>* id $</td><td class="tag-reduce">Reduce R6: F→id</td></tr>
+      <tr><td>0 E 1 + 6 F 3</td><td>* id $</td><td class="tag-reduce">Reduce R4: T→F</td></tr>
+      <tr><td>0 E 1 + 6 T 9</td><td>* id $</td><td class="tag-shift">Shift S7 (*)</td></tr>
+      <tr><td>0 E 1 + 6 T 9 * 7</td><td>id $</td><td class="tag-shift">Shift S5 (id)</td></tr>
+      <tr><td>0 E 1 + 6 T 9 * 7 id 5</td><td>$</td><td class="tag-reduce">Reduce R6: F→id</td></tr>
+      <tr><td>0 E 1 + 6 T 9 * 7 F 10</td><td>$</td><td class="tag-reduce">Reduce R3: T→T*F</td></tr>
+      <tr><td>0 E 1 + 6 T 9</td><td>$</td><td class="tag-reduce">Reduce R1: E→E+T</td></tr>
+      <tr><td>0 E 1</td><td>$</td><td class="tag-accept">Accept ✓</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- REVIEW Q&A -->
+<section id="sec-review">
+  <div class="section-header">
+    <span class="section-num">Review</span>
+    <h2>Key Questions &amp; Short Answers</h2>
+  </div>
+  <div class="divider"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Question</th>
+          <th>Answer (concise)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q1</td>
+          <td>What is the difference between a lexeme and a token?</td>
+          <td><strong>Lexeme</strong> = actual character string (e.g., "sum"). <strong>Token</strong> = numeric category code assigned to that lexeme (e.g., IDENT = 11).</td>
+        </tr>
+        <tr>
+          <td>Q2</td>
+          <td>Why are named constants used for token codes instead of numbers?</td>
+          <td>For <strong>readability</strong>. Writing <code>IDENT</code> is clearer than <code>11</code> when reading lexer/parser code.</td>
+        </tr>
+        <tr>
+          <td>Q3</td>
+          <td>What is a state transition diagram?</td>
+          <td>A <strong>directed graph</strong> (finite automaton) where nodes are states and arcs are labeled with input characters that cause transitions between states.</td>
+        </tr>
+        <tr>
+          <td>Q4</td>
+          <td>Why use character classes instead of individual characters in a state diagram?</td>
+          <td>To <strong>simplify</strong> the diagram. Instead of 52 transitions for each letter, one LETTER transition handles all. Without classes, the diagram would be unmanageably large.</td>
+        </tr>
+        <tr>
+          <td>Q5</td>
+          <td>What are the two goals of syntax analysis?</td>
+          <td>1. <strong>Detect and report syntax errors</strong> (and recover). 2. <strong>Produce a parse tree</strong> (or its trace) for valid input.</td>
+        </tr>
+        <tr>
+          <td>Q6</td>
+          <td>What is left recursion and why does it break top-down parsers?</td>
+          <td>A rule like A→Aα where A generates itself first. In recursive-descent, the function for A immediately calls itself → <strong>infinite recursion</strong>.</td>
+        </tr>
+        <tr>
+          <td>Q7</td>
+          <td>What is the pairwise disjointness test?</td>
+          <td>For each nonterminal with multiple RHSs, check that FIRST(αᵢ) ∩ FIRST(αⱼ) = ∅ for every pair. If not empty, the parser can't choose the right RHS from one token of lookahead.</td>
+        </tr>
+        <tr>
+          <td>Q8</td>
+          <td>What is left factoring?</td>
+          <td>A technique to fix pairwise disjointness failures. Pull out the <strong>common prefix</strong> of two or more RHSs into a new rule so FIRST sets become disjoint.</td>
+        </tr>
+        <tr>
+          <td>Q9</td>
+          <td>Define: phrase, simple phrase, handle.</td>
+          <td><strong>Phrase:</strong> Leaves of any subtree in the parse tree (1+ derivation steps). <strong>Simple phrase:</strong> Phrase derived in exactly 1 step (= a grammar RHS). <strong>Handle:</strong> The leftmost simple phrase = what to reduce next.</td>
+        </tr>
+        <tr>
+          <td>Q10</td>
+          <td>What mathematical machine underlies both top-down and bottom-up parsers?</td>
+          <td>A <strong>Pushdown Automaton (PDA)</strong> — a finite automaton augmented with a pushdown stack.</td>
+        </tr>
+        <tr>
+          <td>Q11</td>
+          <td>Is left recursion a problem for LR parsers?</td>
+          <td><strong>No.</strong> Left recursion is only a problem for top-down (LL) parsers. LR (bottom-up) parsers handle left-recursive grammars fine.</td>
+        </tr>
+        <tr>
+          <td>Q12</td>
+          <td>Why do compilers not use O(n³) parsers?</td>
+          <td>They are <strong>far too slow</strong> for practical use. Compilers restrict to grammar subclasses where O(n) parsing is possible — linearly faster at a cost of grammar flexibility.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+</body>
+</html>

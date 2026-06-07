@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PL Concepts – All Chapter Summaries</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f4f8; }
+
+  header {
+    background: #2c3e50;
+    color: white;
+    padding: 14px 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 16px;
+    background: #34495e;
+  }
+
+  nav button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #5d7a99;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.2s;
+  }
+
+  nav button:hover { background: #2980b9; }
+  nav button.active { background: #2980b9; font-weight: bold; }
+
+  iframe {
+    width: 100%;
+    height: calc(100vh - 110px);
+    border: none;
+    display: block;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<header>📚 Concepts of Programming Languages – Chapter Summaries</header>
+
+<nav id="tabs"></nav>
+
+<iframe id="frame" src=""></iframe>
+
+<script>
+  const chapters = [
+    { label: "Ch 2",      file: "chapter_2_sum.html" },
+    { label: "Ch 3",      file: "chapter_3_sum.html" },
+    { label: "Ch 4",      file: "chapter_4_sum.html" },
+    { label: "Ch 5",      file: "chapter_5_sum.html" },
+    { label: "Ch 6",      file: "chapter_6_sum_gemini.html" },
+    { label: "Ch 7",      file: "chapter_7_sum.html" },
+    { label: "Ch 8",      file: "chapter_8_1_sum.html" },
+    { label: "Ch 15–16",  file: "chapter_15_16_sum.html" },
+  ];
+
+  const nav   = document.getElementById("tabs");
+  const frame = document.getElementById("frame");
+
+  chapters.forEach((ch, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = ch.label;
+    btn.onclick = () => {
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      frame.src = ch.file;
+    };
+    nav.appendChild(btn);
+    if (i === 0) { btn.classList.add("active"); frame.src = ch.file; }
+  });
+</script>
+
+</body>
+</html>

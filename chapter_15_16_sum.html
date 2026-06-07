@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Guide — Ch. 15 & 16 | Concepts of Programming Languages</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #13162a;
+    --surface2: #1c2040;
+    --border: #2a2f5a;
+    --accent1: #7c6ff7;
+    --accent2: #48d8c8;
+    --accent3: #f7a04a;
+    --accent4: #f06292;
+    --text: #e0e4f5;
+    --text-muted: #8890b5;
+    --green: #66d9a0;
+    --red: #f76f7c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    padding: 0 0 80px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f0f2d 0%, #1a1040 50%, #0d1a2a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 52px 40px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(124,111,247,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 80% at 20% 80%, rgba(72,216,200,0.08) 0%, transparent 70%);
+  }
+  .hero-inner { position: relative; max-width: 1100px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(72,216,200,.1);
+    border: 1px solid rgba(72,216,200,.3);
+    padding: 4px 12px;
+    border-radius: 3px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .hero h1 span { color: var(--accent1); }
+  .hero p { color: var(--text-muted); font-size: .95rem; max-width: 580px; }
+
+  /* ── NAV TABS ── */
+  .tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,15,26,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 0 40px;
+  }
+  .tab-nav::-webkit-scrollbar { height: 3px; }
+  .tab-nav::-webkit-scrollbar-thumb { background: var(--accent1); border-radius: 2px; }
+  .tab-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .04em;
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent1); border-bottom-color: var(--accent1); }
+
+  /* ── CONTENT WRAPPER ── */
+  .wrapper { max-width: 1100px; margin: 0 auto; padding: 36px 40px 0; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── SECTION HEADER ── */
+  .sec-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .sec-head .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    padding: 3px 9px;
+    border-radius: 3px;
+  }
+  .chip-purple { color: var(--accent1); background: rgba(124,111,247,.12); border: 1px solid rgba(124,111,247,.25); }
+  .chip-teal   { color: var(--accent2); background: rgba(72,216,200,.12);  border: 1px solid rgba(72,216,200,.25); }
+  .chip-orange { color: var(--accent3); background: rgba(247,160,74,.12);  border: 1px solid rgba(247,160,74,.25); }
+  .chip-pink   { color: var(--accent4); background: rgba(240,98,146,.12);  border: 1px solid rgba(240,98,146,.25); }
+  .chip-green  { color: var(--green);   background: rgba(102,217,160,.12); border: 1px solid rgba(102,217,160,.25); }
+
+  .sec-head h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+  }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; margin-bottom: 32px; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  thead th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid rgba(42,47,90,.6); transition: background .15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(124,111,247,.05); }
+  td { padding: 11px 16px; vertical-align: top; }
+  td:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem;
+    color: var(--accent2);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  td.key-concept {
+    color: var(--accent1);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem;
+    font-weight: 600;
+  }
+  td em { color: var(--accent3); font-style: normal; font-weight: 500; }
+  td code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .8rem;
+    background: rgba(124,111,247,.1);
+    border: 1px solid rgba(124,111,247,.2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent1);
+  }
+
+  /* ── CARDS ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color .2s, transform .2s;
+  }
+  .card:hover { border-color: var(--accent1); transform: translateY(-2px); }
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 7px; }
+  .card p { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── COMPARISON GRID ── */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media(max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .compare-col h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-col ul { list-style: none; }
+  .compare-col ul li {
+    font-size: .85rem;
+    color: var(--text-muted);
+    padding: 5px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .compare-col ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent3);
+  }
+
+  /* ── QUICK QUIZ ── */
+  .quiz-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+  .quiz-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .quiz-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--accent4);
+    background: rgba(240,98,146,.1);
+    border: 1px solid rgba(240,98,146,.2);
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .quiz-item p { font-size: .88rem; color: var(--text-muted); }
+  .quiz-item p strong { color: var(--text); font-weight: 500; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 28px; margin-bottom: 32px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent1), var(--accent2));
+  }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent1);
+    position: absolute;
+    left: -28px;
+    top: 4px;
+    border: 2px solid var(--bg);
+  }
+  .tl-item h4 { font-family: 'Syne', sans-serif; font-size: .92rem; font-weight: 700; margin-bottom: 3px; }
+  .tl-item h4 span { color: var(--accent3); font-weight: 400; font-size: .82rem; font-family: 'Inter', sans-serif; margin-left: 8px; }
+  .tl-item p { font-size: .83rem; color: var(--text-muted); }
+
+  /* ── LABEL BADGE ── */
+  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: .7rem; padding: 2px 7px; border-radius: 3px; margin-right: 4px; }
+  .b-yes { background: rgba(102,217,160,.15); color: var(--green); border: 1px solid rgba(102,217,160,.3); }
+  .b-no  { background: rgba(247,111,124,.15); color: var(--red);   border: 1px solid rgba(247,111,124,.3); }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-left: 3px solid var(--accent3);
+    background: rgba(247,160,74,.06);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: .86rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .callout strong { color: var(--accent3); }
+
+  /* ── SUBHEADING ── */
+  .subhead {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media(max-width: 640px) {
+    .hero, .wrapper { padding-left: 20px; padding-right: 20px; }
+    .tab-nav { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Sebesta · Concepts of Programming Languages</div>
+    <h1>Chapters 15 &amp; 16<br><span>Comprehensive Study Guide</span></h1>
+    <p>Functional Programming Languages &amp; Logic Programming Languages — key concepts, comparisons, code, and quiz material for your exam.</p>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="show('overview')">Overview</button>
+  <button class="tab-btn" onclick="show('ch15-concepts')">Ch.15 Core Concepts</button>
+  <button class="tab-btn" onclick="show('languages')">Language Profiles</button>
+  <button class="tab-btn" onclick="show('scheme')">Scheme Deep Dive</button>
+  <button class="tab-btn" onclick="show('ch16-concepts')">Ch.16 Core Concepts</button>
+  <button class="tab-btn" onclick="show('prolog')">Prolog Deep Dive</button>
+  <button class="tab-btn" onclick="show('compare')">FP vs LP vs IP</button>
+  <button class="tab-btn" onclick="show('quiz')">Quick Quiz</button>
+</nav>
+
+<div class="wrapper">
+
+<!-- ─── OVERVIEW ─── -->
+<div id="overview" class="section active">
+  <div class="sec-head"><span class="chip chip-purple">Intro</span><h2>Chapter Roadmap</h2></div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="card-tag" style="color:var(--accent1)">Chapter 15</span>
+      <h3>Functional Programming Languages</h3>
+      <p>Based on mathematical functions. No variables, no assignment, no state. Execution via function application, recursion, and conditional expressions.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag" style="color:var(--accent2)">Chapter 16</span>
+      <h3>Logic Programming Languages</h3>
+      <p>Based on predicate calculus. Programs are facts + rules. Execution via resolution and unification — declarative, not procedural.</p>
+    </div>
+    <div class="card">
+      <span class="card-tag" style="color:var(--accent3)">Key contrast</span>
+      <h3>Paradigm Comparison</h3>
+      <p>Imperative: <em>how</em> to compute. Functional: <em>what</em> functions produce. Logic: <em>what</em> the result looks like — the system figures out how.</p>
+    </div>
+  </div>
+
+  <div class="subhead">Chapter 15 — Section Map</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Section</th><th>Topic</th><th>Key Ideas</th></tr></thead>
+      <tbody>
+        <tr><td>15.1</td><td>Introduction</td><td>Von Neumann vs. functional paradigm; Backus's Turing Award argument for functional purity</td></tr>
+        <tr><td>15.2</td><td>Mathematical Functions</td><td>Domain/range, lambda notation, higher-order functions, function composition, apply-to-all</td></tr>
+        <tr><td>15.3</td><td>Fundamentals of FP Languages</td><td>Referential transparency; no state; recursion instead of iteration; primitive functions + functional forms</td></tr>
+        <tr><td>15.4</td><td>Lisp Origins</td><td>McCarthy 1959; atoms &amp; lists; S-expressions; EVAL; dynamic vs. static scoping; accidental interpreter</td></tr>
+        <tr><td>15.5</td><td>Scheme Deep Dive</td><td>DEFINE, LAMBDA, QUOTE, CAR/CDR/CONS, IF/COND, LET, tail recursion, map, compose</td></tr>
+        <tr><td>15.6</td><td>Common Lisp</td><td>Union of Lisp dialects; macros; both static &amp; dynamic scoping; DEFMACRO; CLOS</td></tr>
+        <tr><td>15.7</td><td>ML</td><td>Static scoping, strong typing, type inference, pattern matching, currying, val, filter/map</td></tr>
+        <tr><td>15.8</td><td>Haskell</td><td>Pure FP, lazy evaluation, infinite lists, list comprehensions, overloading, guards</td></tr>
+        <tr><td>15.9</td><td>F#</td><td>.NET functional language; OCaml-based; pipeline <code>|&gt;</code> and composition <code>&gt;&gt;</code> operators; sequences; currying</td></tr>
+        <tr><td>15.10</td><td>FP in Imperative Languages</td><td>Lambda expressions in JavaScript, C#, Java 8, Python, Ruby; anonymous functions; closures</td></tr>
+        <tr><td>15.11</td><td>FP vs. Imperative</td><td>Simpler syntax/semantics; productivity claims; execution efficiency; concurrency advantages</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Chapter 16 — Section Map</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Section</th><th>Topic</th><th>Key Ideas</th></tr></thead>
+      <tbody>
+        <tr><td>16.1</td><td>Introduction</td><td>Declarative vs. procedural; facts and rules; logic programs as theorem proving</td></tr>
+        <tr><td>16.2</td><td>Predicate Calculus</td><td>Propositions, compound terms, functors, quantifiers (∀, ∃), clausal form, antecedent/consequent</td></tr>
+        <tr><td>16.3</td><td>Proving Theorems</td><td>Resolution principle (Robinson, 1965); unification; instantiation; backtracking; Horn clauses</td></tr>
+        <tr><td>16.4</td><td>Overview of Logic Programming</td><td>Declarative semantics; nonprocedural; predicate calculus as the "language"; resolution as execution</td></tr>
+        <tr><td>16.5</td><td>Origins of Prolog</td><td>Colmerauer &amp; Roussel (Aix-Marseille) + Kowalski (Edinburgh); Japanese FGCS 1981</td></tr>
+        <tr><td>16.6</td><td>Basic Elements of Prolog</td><td>Terms, facts, rules, goals; inference process; arithmetic with <code>is</code>; trace; list structures; append; member</td></tr>
+        <tr><td>16.7</td><td>Deficiencies of Prolog</td><td>Resolution order control; cut operator; closed-world assumption; negation problem; intrinsic limits</td></tr>
+        <tr><td>16.8</td><td>Applications of Logic Programming</td><td>RDBMS, expert systems, natural-language processing</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── CH15 CORE CONCEPTS ─── -->
+<div id="ch15-concepts" class="section">
+  <div class="sec-head"><span class="chip chip-purple">Ch.15</span><h2>Core Functional Programming Concepts</h2></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th><th>Key Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="key-concept">Mathematical Function</td><td>A mapping from a domain set to a range set via an expression</td><td>No side effects; always maps same input → same output; no state</td></tr>
+        <tr><td class="key-concept">Lambda Expression</td><td>A nameless function definition: λ(x) x*x*x</td><td>Devised by Alonzo Church (1941); basis of lambda calculus; untyped LC inspires FP langs</td></tr>
+        <tr><td class="key-concept">Higher-Order Function / Functional Form</td><td>A function that takes one or more functions as parameters OR returns a function</td><td>Examples: function composition (f∘g), apply-to-all (map), filter</td></tr>
+        <tr><td class="key-concept">Function Composition</td><td>h ≡ f∘g means h(x) = f(g(x))</td><td>In Scheme: <code>(compose f g)</code>; In ML: <code>val h = g o f</code>; In F#: <code>f &gt;&gt; g</code></td></tr>
+        <tr><td class="key-concept">Apply-to-All (map)</td><td>Applies a function to each element of a list, returns list of results</td><td>Denoted α in math; <code>map</code> in Scheme, ML, Haskell, Python; <code>mapcar</code> in older Lisp</td></tr>
+        <tr><td class="key-concept">Referential Transparency</td><td>A function always returns the same value for the same arguments, regardless of context</td><td>Key property of pure FP; no side effects; simplifies testing; no need to track state</td></tr>
+        <tr><td class="key-concept">Tail Recursion</td><td>A recursive call is the last operation in the function; its return value IS the caller's return value</td><td>Can be compiled to iteration → stack depth stays constant; Scheme requires tail recursion optimization</td></tr>
+        <tr><td class="key-concept">Currying</td><td>Replacing a multi-parameter function with a chain of single-parameter functions</td><td>Named after Haskell Curry; supported in ML, Haskell, F#, Scheme; enables partial evaluation</td></tr>
+        <tr><td class="key-concept">Partial Evaluation</td><td>Evaluating a curried function with fewer arguments than it takes, producing a new function</td><td>E.g., <code>add 5</code> in ML returns a function that adds 5 to its argument</td></tr>
+        <tr><td class="key-concept">Lazy Evaluation</td><td>Expressions evaluated only when their values are needed</td><td>Used by Haskell; enables infinite data structures; contrasts with <em>strict</em> evaluation (Scheme, ML)</td></tr>
+        <tr><td class="key-concept">Strict Evaluation</td><td>All actual parameters fully evaluated before function is called</td><td>Used by Scheme, ML; ensures evaluation order independence; opposite of lazy</td></tr>
+        <tr><td class="key-concept">Type Inference</td><td>Compiler deduces types without explicit declarations</td><td>Used in ML, Haskell, F#; based on operators and literals; e.g., <code>fun f(x) = 10*x</code> → x:int</td></tr>
+        <tr><td class="key-concept">S-Expression</td><td>Lisp's unified notation for both code and data (atoms or lists)</td><td>Enables programs to build and evaluate code at runtime; basis for Lisp macros</td></tr>
+        <tr><td class="key-concept">Closure</td><td>A lambda expression that captures variables from its enclosing scope</td><td>In C#: captured variables have their lifetimes extended; supported in Python, Ruby, JavaScript, F#</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Mathematical Functions — Key Distinctions</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>Mathematical Function</th><th>Imperative Variable/Subprogram</th></tr></thead>
+      <tbody>
+        <tr><td>State</td><td>No state; no memory cells</td><td>Has state; memory cells that change</td></tr>
+        <tr><td>Side Effects</td><td>None — same input always → same output</td><td>May depend on nonlocal/global variables</td></tr>
+        <tr><td>Parameters</td><td>Bound and constant during evaluation</td><td>May be mutable; can be reassigned</td></tr>
+        <tr><td>Repetition</td><td>Controlled by recursion &amp; conditionals</td><td>Controlled by iteration (loops)</td></tr>
+        <tr><td>Evaluation Order</td><td>Driven by expression structure</td><td>Driven by sequence of statements</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Functional Forms Comparison</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Form</th><th>Math Notation</th><th>Scheme</th><th>ML</th><th>Haskell</th></tr></thead>
+      <tbody>
+        <tr><td>Composition</td><td>h = f∘g</td><td><code>(compose f g)</code></td><td><code>val h = g o f</code></td><td><code>h = f . g</code></td></tr>
+        <tr><td>Apply-to-All</td><td>α(h, list)</td><td><code>(map fun list)</code></td><td><code>map f list</code></td><td><code>map f list</code></td></tr>
+        <tr><td>Filter</td><td>—</td><td>not built-in (use COND+recursion)</td><td><code>filter (fn x =&gt; x&lt;100) lst</code></td><td><code>filter (&lt;100) lst</code></td></tr>
+        <tr><td>Curry</td><td>—</td><td>manual LAMBDA nesting</td><td><code>fun add a b = a + b</code></td><td>all functions curried by default</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── LANGUAGE PROFILES ─── -->
+<div id="languages" class="section">
+  <div class="sec-head"><span class="chip chip-teal">Languages</span><h2>Functional Language Profiles</h2></div>
+
+  <div class="subhead">Language Genealogy</div>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-dot"></div><h4>Lisp <span>1959 — John McCarthy, MIT</span></h4><p>First functional language. Atoms &amp; lists. Typeless. S-expressions for code &amp; data. Dynamic scoping (early). EVAL as accidental interpreter. Still dominant in AI.</p></div>
+    <div class="tl-item"><div class="tl-dot"></div><h4>Scheme <span>mid-1970s — Sussman &amp; Steele, MIT</span></h4><p>Small, clean Lisp dialect. Static scoping exclusively. First-class functions. Tail recursion required. Educational &amp; research language.</p></div>
+    <div class="tl-item"><div class="tl-dot"></div><h4>Common Lisp <span>early 1980s — standardization effort</span></h4><p>Union of Lisp dialects. Large &amp; complex. Both static and dynamic scoping. Macros (DEFMACRO, reader macros). CLOS for OOP. Commercial AI use.</p></div>
+    <div class="tl-item"><div class="tl-dot"></div><h4>ML <span>Milner et al., Edinburgh</span></h4><p>Static scoping, strong typing, type inference. Infix notation. Pattern matching. Exception handling. Spawned Haskell, Caml, OCaml, F#.</p></div>
+    <div class="tl-item"><div class="tl-dot"></div><h4>Haskell <span>descended from ML &amp; Miranda</span></h4><p>Pure FP (no side effects). Lazy/nonstrict evaluation. Infinite lists. List comprehensions. Function overloading (unlike ML). Strongly typed with inference.</p></div>
+    <div class="tl-item"><div class="tl-dot"></div><h4>F# <span>.NET era — OCaml-based</span></h4><p>OCaml descendant. Functional + imperative + OOP. Full .NET interop and IDE. Pipeline <code>|&gt;</code> and composition <code>&gt;&gt;</code>. Lazy sequences. Currying supported.</p></div>
+  </div>
+
+  <div class="subhead">Language Feature Comparison Matrix</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Scheme</th><th>Common Lisp</th><th>ML</th><th>Haskell</th><th>F#</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Scoping</td>
+          <td>Static only</td><td>Static + Dynamic</td><td>Static only</td><td>Static only</td><td>Static only</td>
+        </tr>
+        <tr>
+          <td>Typing</td>
+          <td>Essentially typeless</td><td>Dynamic types</td><td>Strong + inference</td><td>Strong + inference</td><td>Strong + inference</td>
+        </tr>
+        <tr>
+          <td>Pure FP</td>
+          <td><span class="badge b-no">No</span> (has imperative features)</td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span> (mutable arrays)</td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-no">No</span></td>
+        </tr>
+        <tr>
+          <td>Lazy Eval</td>
+          <td><span class="badge b-no">No</span> (strict)</td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td>Sequences only</td>
+        </tr>
+        <tr>
+          <td>Type Inference</td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Fn Overloading</td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Pattern Matching</td>
+          <td>COND/IF</td>
+          <td>COND</td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td><span class="badge b-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Currying</td>
+          <td>Manual (LAMBDA)</td>
+          <td>Manual</td>
+          <td><span class="badge b-yes">Yes</span></td>
+          <td>Default (all fns)</td>
+          <td><span class="badge b-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td>Macros</td>
+          <td>Limited</td>
+          <td><span class="badge b-yes">Yes</span> (DEFMACRO)</td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+          <td><span class="badge b-no">No</span></td>
+        </tr>
+        <tr>
+          <td>OOP Support</td>
+          <td><span class="badge b-no">No</span></td>
+          <td>CLOS</td>
+          <td>Module system</td>
+          <td>Type classes</td>
+          <td>Full OOP (.NET)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">FP in Primarily Imperative Languages (§15.10)</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Language</th><th>Feature</th><th>Syntax Example</th></tr></thead>
+      <tbody>
+        <tr><td>JavaScript</td><td>Anonymous functions, closures</td><td><code>function(x){ return x*x; }</code> or <code>x =&gt; x*x</code></td></tr>
+        <tr><td>C#</td><td>Lambda expressions (delegates), closures, Func&lt;&gt;</td><td><code>n =&gt; n &gt; 0</code>; <code>Func&lt;int,int&gt; f = x =&gt; x*2;</code></td></tr>
+        <tr><td>Java 8+</td><td>Lambda expressions</td><td><code>x -&gt; x * x</code> (uses <code>-&gt;</code> not <code>=&gt;</code>)</td></tr>
+        <tr><td>Python</td><td>lambda, map, filter, partial</td><td><code>lambda a,b: 2*a - b</code>; <code>map(lambda x: x**3, [2,4,6])</code></td></tr>
+        <tr><td>Ruby</td><td>Blocks, lambda, curry</td><td><code>times = lambda {|a,b| a*b}; times5 = times.curry.(5)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── SCHEME DEEP DIVE ─── -->
+<div id="scheme" class="section">
+  <div class="sec-head"><span class="chip chip-orange">Scheme</span><h2>Scheme — Complete Reference</h2></div>
+
+  <div class="callout"><strong>Origin:</strong> MIT mid-1970s (Sussman &amp; Steele). Small, static-scoped Lisp dialect. Functions are first-class entities. All tail recursion must be optimized to iteration.</div>
+
+  <div class="subhead">Primitive Functions &amp; Special Forms</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Function / Form</th><th>Purpose</th><th>Example &amp; Result</th></tr></thead>
+      <tbody>
+        <tr><td>Arithmetic: <code>+  -  *  /</code></td><td>Basic arithmetic; + and * can take 0+ args</td><td><code>(+ 3 4 7 6)</code> → 20; <code>(* )</code> → 1</td></tr>
+        <tr><td><code>SQRT, MAX, MIN, MODULO</code></td><td>Math utilities</td><td><code>(SQRT 9)</code> → 3; <code>(MODULO 10 3)</code> → 1</td></tr>
+        <tr><td><code>DEFINE</code></td><td>Special form: bind name to value OR define a function (abbreviated LAMBDA)</td><td><code>(DEFINE pi 3.14159)</code>; <code>(DEFINE (square n) (* n n))</code></td></tr>
+        <tr><td><code>LAMBDA</code></td><td>Nameless function (lambda expression)</td><td><code>(LAMBDA (x) (* x x))</code>; apply: <code>((LAMBDA (x) (* x x)) 7)</code> → 49</td></tr>
+        <tr><td><code>IF</code></td><td>Two-way selector</td><td><code>(IF (&lt;= n 1) 1 (* n (factorial (- n 1))))</code></td></tr>
+        <tr><td><code>COND</code></td><td>Multi-way selector; like a case/switch via predicates</td><td><code>(COND ((NULL? lst) #F) ((EQ? a (CAR lst)) #T) (ELSE ...))</code></td></tr>
+        <tr><td><code>QUOTE / '</code></td><td>Prevents evaluation of parameter (returns it literally)</td><td><code>(QUOTE (A B C))</code> = <code>'(A B C)</code> → (A B C)</td></tr>
+        <tr><td><code>CAR</code></td><td>Returns head (first element) of a list</td><td><code>(CAR '(A B C))</code> → A; <code>(CAR '((A B) C))</code> → (A B)</td></tr>
+        <tr><td><code>CDR</code></td><td>Returns tail (all but first) of a list</td><td><code>(CDR '(A B C))</code> → (B C); <code>(CDR '(A))</code> → ()</td></tr>
+        <tr><td><code>CONS</code></td><td>Constructs a list from head and tail; inverse of CAR/CDR</td><td><code>(CONS 'A '(B C))</code> → (A B C); <code>(CONS '(A B) '(C D))</code> → ((A B) C D)</td></tr>
+        <tr><td><code>LIST</code></td><td>Constructs list from any number of parameters</td><td><code>(LIST 'apple 'orange 'grape)</code> → (apple orange grape)</td></tr>
+        <tr><td><code>EQ?</code></td><td>Pointer equality for symbolic atoms</td><td><code>(EQ? 'A 'A)</code> → #T; unreliable for lists and numeric atoms</td></tr>
+        <tr><td><code>EQV?</code></td><td>Value equality for both symbolic and numeric atoms</td><td><code>(EQV? 3 3)</code> → #T; <code>(EQV? 3.0 3)</code> → #F</td></tr>
+        <tr><td><code>EQUAL?</code></td><td>Structural/deep equality; works on lists; slower</td><td>Use only when type of args is unknown; much slower than EQ? or EQV?</td></tr>
+        <tr><td><code>NULL?</code></td><td>Tests if argument is the empty list</td><td><code>(NULL? '())</code> → #T; <code>(NULL? '(()))</code> → #F (a list with one empty list)</td></tr>
+        <tr><td><code>LIST?</code></td><td>Tests if argument is a list</td><td><code>(LIST? '(X Y))</code> → #T; <code>(LIST? 'X)</code> → #F</td></tr>
+        <tr><td><code>NOT</code></td><td>Inverts Boolean value</td><td><code>(NOT #F)</code> → #T</td></tr>
+        <tr><td><code>LET</code></td><td>Binds names to values in local scope; shorthand for LAMBDA application</td><td><code>(LET ((x 5) (y 3)) (+ x y))</code> → 8</td></tr>
+        <tr><td><code>EVAL</code></td><td>Evaluates an expression; can evaluate dynamically-built code</td><td><code>(EVAL (CONS '+ '(3 4 5)))</code> → 12</td></tr>
+        <tr><td>CADR, CADDR, etc.</td><td>Shorthand compositions of CAR and CDR</td><td><code>(CADR lst)</code> = <code>(CAR (CDR lst))</code> = second element</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Key Scheme Functions — Patterns &amp; Logic</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Pattern Used</th><th>Key Trick</th></tr></thead>
+      <tbody>
+        <tr><td><code>member</code></td><td>COND: null check → EQ? with CAR → recurse on CDR</td><td>Null check MUST come before EQ? check (CAR on empty list = error)</td></tr>
+        <tr><td><code>equalsimp</code></td><td>Compare simple lists element by element</td><td>Four COND cases: list1 null; list2 null; CARs equal (recurse CDRs); else #F</td></tr>
+        <tr><td><code>equal</code></td><td>Deep list equality using LIST? + recursive CAR/CDR</td><td>First checks if args are atoms (not lists) using <code>NOT (LIST? ...)</code></td></tr>
+        <tr><td><code>append</code></td><td>CONS (CAR of list1) onto recursive append of (CDR list1) and list2</td><td>Base case: list1 is null → return list2</td></tr>
+        <tr><td><code>factorial</code> (non-tail)</td><td><code>IF (&lt;= n 1) 1 (* n (factorial (- n 1)))</code></td><td>Last operation is multiplication — NOT tail recursive</td></tr>
+        <tr><td><code>factorial</code> (tail)</td><td>Helper <code>facthelper n factpartial</code> accumulates result</td><td>Pass partial product as parameter; last op is recursive call → tail recursive</td></tr>
+        <tr><td><code>map</code></td><td>CONS (fun (CAR list)) onto (map fun (CDR list))</td><td>Base: null list → '() ; applies function to every element</td></tr>
+        <tr><td><code>compose</code></td><td><code>(LAMBDA (x)(f (g x)))</code></td><td>Returns a new function; ((compose CAR CDR) '((a b) c d)) → c</td></tr>
+        <tr><td><code>adder</code> (dynamic)</td><td><code>(EVAL (CONS '+ a_list))</code></td><td>Demonstrates code-as-data: builds a call expression at runtime and evaluates it</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Tail Recursion — Why It Matters</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>Non-Tail Recursive</th><th>Tail Recursive</th></tr></thead>
+      <tbody>
+        <tr><td>Last operation</td><td>Multiplication, addition, etc. <em>after</em> recursive call returns</td><td>The recursive call itself IS the last operation</td></tr>
+        <tr><td>Stack frames</td><td>O(n) — one per recursive call; results stored until unwinding</td><td>O(1) — single activation record; previous frame can be reused</td></tr>
+        <tr><td>Scheme requirement</td><td>Not required to optimize</td><td>Scheme spec REQUIRES conversion to iteration</td></tr>
+        <tr><td>Technique</td><td>—</td><td>Use accumulating helper parameter (carry partial result)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── CH16 CORE CONCEPTS ─── -->
+<div id="ch16-concepts" class="section">
+  <div class="sec-head"><span class="chip chip-teal">Ch.16</span><h2>Core Logic Programming Concepts</h2></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th><th>Key Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="key-concept">Proposition</td><td>A logical statement that may or may not be true; consists of objects and relationships</td><td>Can be stated as a fact (assumed true) or as a query (truth to be determined)</td></tr>
+        <tr><td class="key-concept">Atomic Proposition</td><td>A single compound term: functor + ordered parameter list</td><td>e.g., <code>man(jake)</code>, <code>likes(bob, steak)</code>; no intrinsic semantics</td></tr>
+        <tr><td class="key-concept">Compound Term</td><td>Two parts: a functor (names the relation) + ordered parameter list</td><td>Represents an element of a mathematical relation (table row)</td></tr>
+        <tr><td class="key-concept">Functor</td><td>The function symbol naming the relation in a compound term</td><td>e.g., <code>father</code> in <code>father(bill, jake)</code></td></tr>
+        <tr><td class="key-concept">Clausal Form</td><td>Standard proposition form: B1∪…∪Bn ⊂ A1∩…∩Am — if all A's true, then at least one B is true</td><td>Antecedent (right/if part) → Consequent (left/then part); all props can be converted to clausal form</td></tr>
+        <tr><td class="key-concept">Horn Clause</td><td>Restricted clausal form: either a single atomic prop on the left (headed) or empty left side (headless)</td><td>Headed = rules; Headless = facts; restriction makes resolution practical; named after Alfred Horn (1951)</td></tr>
+        <tr><td class="key-concept">Resolution</td><td>An inference rule for deriving new propositions from given ones in clausal form</td><td>Discovered by Alan Robinson (1965, Syracuse); basis of Prolog's inferencing; refutation-complete</td></tr>
+        <tr><td class="key-concept">Unification</td><td>Process of finding variable instantiations that allow propositions to match during resolution</td><td>Variables temporarily bound to values; if match fails, backtracking may try other values</td></tr>
+        <tr><td class="key-concept">Instantiation</td><td>Temporary assignment of a value to a variable during resolution</td><td>Lasts only for the duration of one goal proof; uninstantiated variables are free</td></tr>
+        <tr><td class="key-concept">Backtracking</td><td>When a subgoal fails, the system backs up and tries alternate solutions for the previous subgoal</td><td>Core to Prolog; can be costly (time/space); controlled with the cut operator</td></tr>
+        <tr><td class="key-concept">Forward Chaining</td><td>Bottom-up resolution: start from facts, work toward goal</td><td>Better when many candidate answers exist; Prolog does NOT use this</td></tr>
+        <tr><td class="key-concept">Backward Chaining</td><td>Top-down resolution: start from goal, work backward to find supporting facts</td><td>Prolog uses this; better for small candidate answer sets</td></tr>
+        <tr><td class="key-concept">Depth-First Search</td><td>Prove first subgoal completely before moving to next; Prolog's approach</td><td>Uses less memory than breadth-first but can loop; requires careful DB ordering</td></tr>
+        <tr><td class="key-concept">Declarative Semantics</td><td>Each statement's meaning is determined from the statement itself, independent of how it's used</td><td>Far simpler than imperative semantics; no need to trace execution or know state</td></tr>
+        <tr><td class="key-concept">Closed-World Assumption</td><td>If a goal cannot be proved true from the database, Prolog assumes it is false</td><td>Prolog is true/fail, not true/false; cannot prove negation — only assumes it when proof of positive fails</td></tr>
+        <tr><td class="key-concept">Cut Operator (!)</td><td>A goal that always succeeds but prevents backtracking past it</td><td>Side effect: subgoals to its left cannot be re-satisfied; compared to goto in imperative languages</td></tr>
+        <tr><td class="key-concept">Nonprocedural Programming</td><td>Specify characteristics of the result, not how to compute it</td><td>The system determines HOW; pure logic programming ideal; Prolog only partially achieves this due to cut, ordering</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Predicate Calculus — Logical Connectors</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Symbol</th><th>Name</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>⫎</td><td>Negation</td><td>NOT — highest precedence</td></tr>
+        <tr><td>∩</td><td>Conjunction</td><td>AND</td></tr>
+        <tr><td>∪</td><td>Disjunction</td><td>OR</td></tr>
+        <tr><td>⊃</td><td>Implication</td><td>IF … THEN (left to right)</td></tr>
+        <tr><td>⊂</td><td>Reverse Implication</td><td>IF … THEN (right to left; used in clausal form)</td></tr>
+        <tr><td>≡</td><td>Equivalence</td><td>IF AND ONLY IF</td></tr>
+        <tr><td>∀X</td><td>Universal Quantifier</td><td>For all X — implied by variables in clausal form</td></tr>
+        <tr><td>∃X</td><td>Existential Quantifier</td><td>There exists an X — not required in clausal form</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Prolog Deficiencies — Summary</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Problem</th><th>Description</th><th>Workaround / Implication</th></tr></thead>
+      <tbody>
+        <tr><td><em>Resolution Order Control</em></td><td>DB order affects efficiency; Prolog always matches first-to-last, left-to-right</td><td>Programmer must order DB statements carefully; violates pure LP principle</td></tr>
+        <tr><td><em>Cut Operator</em></td><td>Explicit backtracking control via <code>!</code>; analogy to goto</td><td>Useful for efficiency/generate-and-test but compromises declarative nature</td></tr>
+        <tr><td><em>Closed-World Assumption</em></td><td>Anything not provable is assumed false; Prolog is true/fail, not true/false</td><td>Cannot prove negation; only absence of proof → assumed false</td></tr>
+        <tr><td><em>Negation Problem</em></td><td>Prolog's <code>not</code> ≠ logical NOT; <code>not(X)</code> succeeds if resolution cannot prove X</td><td><code>not(not(goal))</code> ≠ <code>goal</code> in Prolog; variables get uninstantiated on failure</td></tr>
+        <tr><td><em>Intrinsic Limits</em></td><td>Nonprocedural description of sorted list requires enumerating all permutations to sort</td><td>Practical Prolog sorting still requires specifying the algorithm; not truly nonprocedural</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── PROLOG DEEP DIVE ─── -->
+<div id="prolog" class="section">
+  <div class="sec-head"><span class="chip chip-green">Prolog</span><h2>Prolog — Complete Reference</h2></div>
+
+  <div class="callout"><strong>Edinburgh Syntax.</strong> Developed by Colmerauer &amp; Roussel (Aix-Marseille) + Kowalski (Edinburgh). Uses backward chaining + depth-first search + backtracking. Every statement ends with a period.</div>
+
+  <div class="subhead">Prolog Terms (Data Types)</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Term Type</th><th>Definition</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td>Atom (constant)</td><td>Symbolic value: lowercase-start string, or any printable chars in apostrophes</td><td><code>jake</code>, <code>bill</code>, <code>'Hello World'</code></td></tr>
+        <tr><td>Integer (constant)</td><td>Numeric literal</td><td><code>42</code>, <code>-7</code></td></tr>
+        <tr><td>Variable</td><td>Uppercase-start or underscore string; bound by instantiation during resolution</td><td><code>X</code>, <code>Parent</code>, <code>_</code> (anonymous variable)</td></tr>
+        <tr><td>Structure</td><td>Atomic proposition: <code>functor(param_list)</code>; represents a relation element</td><td><code>father(bill, jake)</code>, <code>likes(bob, steak)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Statement Types</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Horn Clause Form</th><th>Prolog Syntax</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><em>Fact</em></td><td>Headless Horn clause (unconditional assertion)</td><td><code>structure.</code></td><td><code>father(bill, jake).</code></td></tr>
+        <tr><td><em>Rule</em></td><td>Headed Horn clause (conditional implication)</td><td><code>head :- body.</code></td><td><code>parent(X,Y) :- mother(X,Y).</code></td></tr>
+        <tr><td><em>Goal / Query</em></td><td>Headless Horn clause (proposition to prove)</td><td><code>structure.</code> in query mode</td><td><code>father(X, jake).</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Key Prolog Operators &amp; Built-ins</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Operator / Built-in</th><th>Meaning</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>:-</code></td><td>"can be concluded if" (implication head :- body)</td><td><code>ancestor(X,Y) :- parent(X,Y).</code></td></tr>
+        <tr><td>, (comma)</td><td>AND in rule body — conjunction of subgoals</td><td><code>grandparent(X,Z) :- parent(X,Y), parent(Y,Z).</code></td></tr>
+        <tr><td><code>is</code></td><td>Arithmetic evaluation: right side (expression) evaluated, bound to left side (uninstantiated var)</td><td><code>Y is Speed * Time.</code> — fails if Y already instantiated or any var on right uninstantiated</td></tr>
+        <tr><td><code>=</code></td><td>Unification: succeeds if two terms can be made identical</td><td><code>X = Y</code> succeeds if X and Y can be unified</td></tr>
+        <tr><td><code>not</code></td><td>Negation as failure: succeeds if operand FAILS resolution</td><td><code>not(X = Y)</code> — NOT logical NOT; cannot conclude positive from it</td></tr>
+        <tr><td><code>!</code> (cut)</td><td>Always succeeds; prevents backtracking past this point</td><td><code>a, b, !, c, d.</code> — if c fails, whole goal fails without retrying a or b</td></tr>
+        <tr><td><code>_</code></td><td>Anonymous variable — matches anything, we don't care what</td><td><code>member(E, [E | _]).</code></td></tr>
+        <tr><td><code>[ | ]</code></td><td>List notation with head and tail</td><td><code>[H|T]</code> — H is head, T is tail; like CAR/CDR</td></tr>
+        <tr><td><code>trace</code></td><td>Built-in: enables tracing of resolution steps (call/exit/redo/fail)</td><td><code>trace.</code> then submit goal to see step-by-step proof</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Tracing Model — Four Events</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Event</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><em>Call</em></td><td>Beginning of attempt to satisfy a goal (entering forward)</td></tr>
+        <tr><td><em>Exit</em></td><td>Goal has been successfully satisfied</td></tr>
+        <tr><td><em>Redo</em></td><td>Backtracking caused re-attempt to satisfy this goal (entering backward via redo port)</td></tr>
+        <tr><td><em>Fail</em></td><td>Goal failed — cannot be satisfied</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Key Prolog Programs — Patterns</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Program</th><th>Code Pattern</th><th>Key Logic</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>append</code></td>
+          <td><code>append([], List, List).</code><br><code>append([H|L1], L2, [H|L3]) :- append(L1, L2, L3).</code></td>
+          <td>Base: empty first list → return second. Recursive: peel head of first list, recurse on tail. More flexible than Lisp — can use to find what two lists make [a,b,c].</td>
+        </tr>
+        <tr>
+          <td><code>member</code></td>
+          <td><code>member(E, [E|_]).</code><br><code>member(E, [_|T]) :- member(E,T).</code></td>
+          <td>First clause: E matches head. Second clause: recurse on tail. <code>_</code> = don't care. Use <code>!</code> after first clause if list is a set.</td>
+        </tr>
+        <tr>
+          <td><code>reverse</code> (list_op_2)</td>
+          <td><code>reverse([], []).</code><br><code>reverse([H|T], L) :- reverse(T, R), append(R, [H], L).</code></td>
+          <td>Reverse tail, then append head at the end. Uses append as helper. Returns list in reverse order.</td>
+        </tr>
+        <tr>
+          <td>Distance (arithmetic)</td>
+          <td><code>distance(X, Y) :- speed(X, S), time(X, T), Y is S * T.</code></td>
+          <td>Unify S and T from facts, then compute Y with <code>is</code>. Demonstrates arithmetic in declarative style.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">Applications of Logic Programming (§16.8)</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Application</th><th>Why Logic Programming Fits</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><em>Relational DBMS</em></td><td>Tables → Prolog structures; relationships → rules; queries → goals; resolution = retrieval</td><td>Single language for data def + manipulation + queries; built-in deductive capability; slower than RDBMS</td></tr>
+        <tr><td><em>Expert Systems</em></td><td>Facts = knowledge base; rules = inference rules; goals = user queries; trace = explanation of reasoning</td><td>APES system (Sergot, Hammond); can handle default rules for incomplete data; missing: automatic user queries</td></tr>
+        <tr><td><em>Natural Language Processing</em></td><td>LP equivalent to context-free grammars for syntax; backward chaining ≡ parsing; clausal form for semantics</td><td>Logic-based semantic networks; Kowalski's work; NL interfaces to intelligent databases</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── FP vs LP vs IP ─── -->
+<div id="compare" class="section">
+  <div class="sec-head"><span class="chip chip-pink">Compare</span><h2>FP vs. Logic vs. Imperative — Big Picture</h2></div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Imperative</th><th>Functional (FP)</th><th>Logic (LP)</th></tr></thead>
+      <tbody>
+        <tr><td><em>Basis</em></td><td>Von Neumann architecture; memory cells &amp; instructions</td><td>Mathematical functions (lambda calculus)</td><td>First-order predicate calculus</td></tr>
+        <tr><td><em>Programs consist of</em></td><td>Sequences of assignment &amp; control-flow statements</td><td>Function definitions &amp; applications</td><td>Facts (propositions) + rules (implications)</td></tr>
+        <tr><td><em>Execution model</em></td><td>Fetch-execute cycle; statements in order</td><td>Evaluate function applications; recursion</td><td>Resolution + unification; backward chaining</td></tr>
+        <tr><td><em>Variables</em></td><td>Named memory cells; can be reassigned freely</td><td>Names bound to values; not re-assignable (pure)</td><td>Logical variables; instantiated during resolution; uninstantiated on failure</td></tr>
+        <tr><td><em>State</em></td><td>Central concept; state changes on every assignment</td><td>No state (pure FP); referential transparency</td><td>No state; database of true propositions</td></tr>
+        <tr><td><em>Repetition</em></td><td>Iteration (loops)</td><td>Recursion (+ tail recursion optimization)</td><td>Backtracking &amp; re-instantiation</td></tr>
+        <tr><td><em>Semantics</em></td><td>Complex (operational/denotational); depends on state</td><td>Simpler; no side effects (pure)</td><td>Declarative; meaning from statement alone, not context</td></tr>
+        <tr><td><em>Procedural?</em></td><td>Yes — specifies HOW to compute</td><td>Yes — specifies WHAT functions to apply</td><td>No — specifies WHAT the answer looks like; system decides how</td></tr>
+        <tr><td><em>Concurrency</em></td><td>Hard; shared state requires synchronization</td><td>Natural; pure functions independent, no shared mutable state</td><td>Natural; subgoals of a goal can be proved concurrently</td></tr>
+        <tr><td><em>Execution efficiency</em></td><td>Fastest (designed for von Neumann)</td><td>~2× slower on average than compiled imperative</td><td>Slower; resolution takes more time than table lookup</td></tr>
+        <tr><td><em>Program size</em></td><td>Largest</td><td>4–10× smaller than imperative (claim)</td><td>Very concise for the right problems</td></tr>
+        <tr><td><em>Key languages</em></td><td>C, Java, Python, C#</td><td>Scheme, Haskell, ML, F#, Common Lisp</td><td>Prolog (dominant and only widely used)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subhead">FP vs. Imperative — Extended Comparison (§15.11)</div>
+  <div class="compare-grid">
+    <div class="compare-col">
+      <h3 style="color:var(--accent1)">Functional Advantages</h3>
+      <ul>
+        <li>Simpler syntax: list structure used for both code and data (Lisp)</li>
+        <li>Simpler semantics: no side effects, no need to track state</li>
+        <li>Smaller programs: 4–10× smaller than imperative counterparts (claimed)</li>
+        <li>Easier testing: functions tested in isolation; referential transparency</li>
+        <li>Natural concurrency: pure functions have no shared mutable state; actual parameter expressions can often be evaluated in parallel</li>
+        <li>Less mental overhead: no need to track program state at each step</li>
+      </ul>
+    </div>
+    <div class="compare-col">
+      <h3 style="color:var(--accent3)">Functional Disadvantages</h3>
+      <ul>
+        <li>~2× slower execution than compiled imperative programs on average</li>
+        <li>Lazy evaluation adds semantic complexity and slows execution further</li>
+        <li>Designed on mathematical functions, not von Neumann architecture → less hardware advantage</li>
+        <li>Difficult to learn for programmers trained on imperative languages</li>
+        <li>Early implementations were interpreted → poor performance reputation</li>
+        <li>"Lines of code" productivity metric is misleading; not all lines equal in complexity</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subhead">Prolog vs. Scheme — Key Comparisons</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>Scheme (FP)</th><th>Prolog (LP)</th></tr></thead>
+      <tbody>
+        <tr><td>List head</td><td><code>CAR</code></td><td><code>[H|_]</code> (H in pattern)</td></tr>
+        <tr><td>List tail</td><td><code>CDR</code></td><td><code>[_|T]</code> (T in pattern)</td></tr>
+        <tr><td>List construction</td><td><code>CONS</code></td><td><code>[H|T]</code> notation</td></tr>
+        <tr><td>Append</td><td>Returns a list (value)</td><td>append is a predicate; result is its 3rd parameter</td></tr>
+        <tr><td>Recursion driver</td><td>Explicit recursive calls</td><td>Resolution + backtracking (implicit recursion)</td></tr>
+        <tr><td>Pattern matching</td><td>COND with explicit tests</td><td>Built into unification during resolution</td></tr>
+        <tr><td>Negation</td><td><code>(NOT expr)</code> — logical NOT (returns #T/#F)</td><td><code>not(goal)</code> — negation as failure; not true logical NOT</td></tr>
+        <tr><td>Typing</td><td>Typeless / dynamic</td><td>No types; atoms are just symbols</td></tr>
+        <tr><td>Similarity</td><td colspan="2">Both use list structures; append and reverse have structurally similar recursive definitions; both support list membership tests</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── QUIZ ─── -->
+<div id="quiz" class="section">
+  <div class="sec-head"><span class="chip chip-pink">Quiz Prep</span><h2>High-Probability Exam Questions</h2></div>
+
+  <div class="callout"><strong>Study tip:</strong> These are drawn directly from the Review Questions sections at the end of each chapter and core concepts that appear repeatedly in the text.</div>
+
+  <div class="subhead">Chapter 15 — Functional Programming</div>
+  <ul class="quiz-list">
+    <li class="quiz-item"><span class="quiz-num">Q1</span><p><strong>What is referential transparency?</strong> A function always produces the same result for the same arguments, regardless of context. Possible because pure FP has no side effects and no global state.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q2</span><p><strong>What does a lambda expression specify?</strong> A nameless function — its parameters and a mapping expression. Devised by Alonzo Church (1941). Written λ(x)expression.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q3</span><p><strong>Why is QUOTE needed in Scheme?</strong> Scheme code and data have the same form. Without QUOTE, EVAL would try to evaluate a list parameter as a function call. QUOTE returns its argument without evaluating it.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q4</span><p><strong>What are the two forms of DEFINE?</strong> (1) <code>(DEFINE symbol expression)</code> — binds a name to a value (like a named constant). (2) <code>(DEFINE (name params) expression)</code> — defines a named function (abbreviated LAMBDA binding).</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q5</span><p><strong>Why are CAR and CDR so named?</strong> First Lisp ran on IBM 704, whose memory words had "address" and "decrement" fields. CAR = Contents of Address part of Register; CDR = Contents of Decrement part of Register. Used to store the two pointers of a list node.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q6</span><p><strong>What is tail recursion and why does it matter?</strong> A function is tail recursive if its recursive call is the LAST operation. The return value of the recursive call IS the function's return value. Scheme requires tail recursive functions to be converted to iteration → O(1) stack space instead of O(n).</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q7</span><p><strong>What are the differences between EQ?, EQV?, and EQUAL?</strong> EQ? = pointer equality (reliable only for symbolic atoms). EQV? = value equality for both symbolic and numeric atoms (slower). EQUAL? = deep structural equality including lists (slowest). Use EQ? or = when you know the type; use EQV? for mixed; EQUAL? only when type is unknown.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q8</span><p><strong>What is currying? What is partial evaluation?</strong> Currying replaces a multi-parameter function with a chain of single-parameter functions. Partial evaluation evaluates a curried function with fewer args than it takes, producing a new function that takes the rest. e.g., <code>add 5</code> → a function that adds 5 to any number.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q9</span><p><strong>What is lazy evaluation and which language uses it?</strong> Expressions are evaluated ONLY when their values are needed. Haskell uses lazy (nonstrict) evaluation. Allows infinite data structures (e.g., <code>[0..]</code>). Contrasts with strict evaluation (Scheme, ML, most others) where all params are evaluated before function call.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q10</span><p><strong>Two fundamental ways ML differs from Scheme?</strong> (1) ML is strongly typed with type inference; Scheme is essentially typeless. (2) ML uses infix notation for arithmetic; Scheme uses prefix S-expression notation for everything.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q11</span><p><strong>Three characteristics making Haskell different from ML?</strong> (1) Haskell functions can be overloaded; ML cannot. (2) Haskell uses nonstrict/lazy semantics; ML uses strict. (3) Haskell is a pure functional language (no side effects); ML allows some side effects (mutable arrays).</p></tr></li>
+    <li class="quiz-item"><span class="quiz-num">Q12</span><p><strong>What is a higher-order function? Give examples.</strong> A function that takes functions as parameters OR returns a function OR both. Examples: map (applies function to each list element), filter (returns elements satisfying predicate), compose/∘ (chains two functions), curry (returns new function).</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q13</span><p><strong>Why can concurrency be easier with functional languages?</strong> Pure functions have no side effects and don't depend on global/nonlocal variables — they are independent. Actual parameter expressions can often be evaluated concurrently. Shared immutable data needs no synchronization. The programmer needn't manually partition the program into threads.</p></li>
+  </ul>
+
+  <div class="subhead">Chapter 16 — Logic Programming</div>
+  <ul class="quiz-list">
+    <li class="quiz-item"><span class="quiz-num">Q14</span><p><strong>What are the three primary uses of symbolic logic in formal logic?</strong> (1) Express propositions. (2) Express relationships between propositions. (3) Describe how new propositions can be inferred from propositions assumed to be true.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q15</span><p><strong>What are the two parts of a compound term?</strong> A functor (the function symbol naming the relation) and an ordered parameter list. e.g., in <code>likes(bob, steak)</code>: functor = <code>likes</code>, params = <code>bob, steak</code>.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q16</span><p><strong>What are Horn clauses and what are their two forms?</strong> Horn clauses are restricted clausal form propositions. (1) Headed Horn clause: single atomic prop on left side — used for RULES. (2) Headless Horn clause: empty left side — used for FACTS. Named after Alfred Horn (1951). Restriction makes resolution practical.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q17</span><p><strong>Define resolution and unification.</strong> Resolution: an inference rule that derives new propositions from given ones in clausal form (Robinson, 1965). Unification: the process of finding variable instantiations that allow two propositions to match during resolution. Instantiation = temporarily assigning a value to a variable.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q18</span><p><strong>What is the basic concept of declarative semantics?</strong> Each statement's meaning can be determined from the statement itself alone, without knowing context or execution history. Dramatically simpler than imperative semantics, which requires knowing scoping rules, variable types, and execution history to interpret a statement.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q19</span><p><strong>What is wrong with <code>K is K + 1</code> in Prolog?</strong> If K is uninstantiated, the right side reference is undefined → clause fails. If K IS already instantiated, the left side cannot be re-instantiated → clause fails. The <code>is</code> operator requires right side fully instantiated AND left side uninstantiated. Unlike assignment, it cannot update a value.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q20</span><p><strong>Explain the closed-world assumption. Why is it a limitation?</strong> If Prolog cannot prove a goal is true from its database, it assumes the goal is FALSE. Prolog is true/fail, not true/false — it cannot actually prove things false, only that it cannot prove them true. This can give misleading results; things genuinely unknown appear false.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q21</span><p><strong>Explain the negation problem in Prolog.</strong> Prolog's <code>not(X)</code> succeeds if resolution cannot prove X — it is NOT logical negation. <code>not(not(goal))</code> ≠ <code>goal</code> in Prolog. When not's argument fails, all its variables are uninstantiated, so the outer not returns without useful variable bindings. Caused by Horn clause form: positive logic → only positive conclusions possible.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q22</span><p><strong>What is the difference between forward and backward chaining?</strong> Forward chaining (bottom-up): start from facts in DB, work toward the goal. Better when many potential answers exist. Backward chaining (top-down): start from goal, work backward to find supporting facts. Prolog uses this. Better for small candidate answer sets.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q23</span><p><strong>What is the cut operator and why is it compared to goto?</strong> <code>!</code> always succeeds but prevents backtracking past it — subgoals to its left cannot be re-satisfied. Used to improve efficiency (generate-and-test, set membership). Compared to goto because it introduces explicit control flow into declarative programs, undermining the nonprocedural principle of logic programming.</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q24</span><p><strong>How does Prolog's append differ from Scheme's append?</strong> Prolog's append is a PREDICATE — it returns yes/no, not a list. The result list is bound to its 3rd parameter. It's also more flexible: can be used in reverse (<code>append(X, Y, [a,b,c])</code> finds all ways to split [a,b,c] into two lists). Scheme's append returns a new list (a value).</p></li>
+    <li class="quiz-item"><span class="quiz-num">Q25</span><p><strong>What are the three major application areas of logic programming?</strong> (1) Relational DBMS — tables as facts, relationships as rules, queries as goals. (2) Expert systems — knowledge base + inference rules + goal queries. (3) Natural-language processing — LP equivalent to context-free grammars; backward chaining ≡ parsing.</p></li>
+  </ul>
+</div>
+
+</div><!-- .wrapper -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

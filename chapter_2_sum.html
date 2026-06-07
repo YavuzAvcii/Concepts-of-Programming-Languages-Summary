@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Evolution of Programming Languages — Chapter 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d0f14;
+    color: #c9d1e0;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  header h1 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: #e2e8f4;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  header p {
+    font-size: 0.88rem;
+    color: #6b7a99;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .accent-line {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, #4f8ef7, #a78bfa);
+    margin: 12px auto 0; border-radius: 2px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #1e2535;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 1100px;
+  }
+
+  thead tr { background: #131824; }
+  thead th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4f8ef7;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #1e2535;
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid #161c2a; transition: background 0.15s; }
+  tbody tr:hover { background: #111827; }
+
+  tbody tr.era-header td {
+    background: #0e1420;
+    color: #a78bfa;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border-top: 1px solid #2a2060;
+    border-bottom: 1px solid #2a2060;
+  }
+
+  td {
+    padding: 12px 16px;
+    vertical-align: top;
+    line-height: 1.55;
+    color: #bcc5d8;
+  }
+  td:first-child {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: #f0c96a;
+    white-space: nowrap;
+    min-width: 90px;
+  }
+  td:nth-child(2) {
+    font-weight: 600;
+    color: #e2e8f4;
+    white-space: nowrap;
+    min-width: 100px;
+  }
+  td:nth-child(3) { min-width: 160px; }
+  td:nth-child(4) { min-width: 100px; }
+  td:nth-child(5) { min-width: 260px; }
+  td:nth-child(6) { min-width: 260px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.64rem;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 2px 2px 2px 0;
+    letter-spacing: 0.04em;
+  }
+  .tag-sci    { background: #0f2a4a; color: #60a5fa; border: 1px solid #1d4172; }
+  .tag-ai     { background: #1a1040; color: #a78bfa; border: 1px solid #3b2a7a; }
+  .tag-biz    { background: #092a1a; color: #34d399; border: 1px solid #115535; }
+  .tag-sys    { background: #2a1505; color: #fb923c; border: 1px solid #5a2e0a; }
+  .tag-oo     { background: #2a0a1a; color: #f472b6; border: 1px solid #5a1535; }
+  .tag-logic  { background: #1a1a0a; color: #facc15; border: 1px solid #4a4a0a; }
+  .tag-script { background: #0a2a2a; color: #2dd4bf; border: 1px solid #0a4a4a; }
+  .tag-web    { background: #1a0a2a; color: #c084fc; border: 1px solid #4a1a5a; }
+  .tag-ml     { background: #1a2a0a; color: #86efac; border: 1px solid #2a5a0a; }
+
+  .key-pill {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin: 2px 2px 2px 0;
+    background: #1a1f2e;
+    border: 1px solid #2a3049;
+    color: #94a3c0;
+  }
+
+  .designers { font-size: 0.76rem; color: #7c8faa; font-style: italic; }
+
+  /* Code block */
+  pre {
+    background: #090c12;
+    border: 1px solid #1a2035;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: #a8b8d8;
+    overflow-x: auto;
+    line-height: 1.6;
+    white-space: pre;
+    max-width: 340px;
+  }
+  pre .kw  { color: #7dd3fc; }   /* keywords */
+  pre .fn  { color: #c084fc; }   /* function names */
+  pre .str { color: #86efac; }   /* strings */
+  pre .cm  { color: #4a5568; font-style: italic; } /* comments */
+  pre .num { color: #fbbf24; }   /* numbers */
+  pre .op  { color: #f472b6; }   /* operators */
+
+  .no-code { font-size: 0.75rem; color: #3a4560; font-style: italic; }
+
+  .footnote {
+    margin-top: 28px; font-size: 0.76rem; color: #4a5568;
+    text-align: center; letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Evolution of Major Programming Languages</h1>
+  <p>Chapter 2 — Concepts of Programming Languages</p>
+  <div class="accent-line"></div>
+</header>
+
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th>Year(s)</th>
+      <th>Language</th>
+      <th>Designers / Origin</th>
+      <th>Domain</th>
+      <th>Key Contributions &amp; Historical Notes</th>
+      <th>Example Code</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- ── PIONEER ERA ── -->
+    <tr class="era-header"><td colspan="6">▸ Pioneer Era (1943–1952)</td></tr>
+
+    <tr>
+      <td>1943–1945</td>
+      <td>Plankalkül</td>
+      <td class="designers">Konrad Zuse (Germany)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>First real language design. Never implemented; published 1972. Three-row notation (statement / subscripts / types).
+        <span class="key-pill">Arrays &amp; Records</span>
+        <span class="key-pill">Iteration (no goto)</span>
+        <span class="key-pill">Assertions</span>
+      </td>
+      <td>
+<pre><span class="cm">| Assign A[4]+1 to A[5]</span>
+<span class="cm">| (three-row notation)</span>
+  | A <span class="op">+</span> <span class="num">1</span> <span class="op">=&gt;</span> A
+V | <span class="num">4</span>       <span class="num">5</span>
+S | <span class="kw">1.n</span>     <span class="kw">1.n</span>
+<span class="cm">
+V = subscript row
+S = type row (1.n = n-bit int)</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1949</td>
+      <td>Short Code</td>
+      <td class="designers">John Mauchly (BINAC/UNIVAC I)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>First "pseudocode." Byte-pair coded math expressions. Pure interpreter — ~50× slower than machine code.
+        <span class="key-pill">Pure interpretation</span>
+      </td>
+      <td>
+<pre><span class="cm">; X0 = SQRT(ABS(Y0))</span>
+<span class="cm">; encoded as byte-pairs:</span>
+<span class="num">00</span> X0 <span class="num">03</span> <span class="num">20</span> <span class="num">06</span> Y0
+<span class="cm">
+03 = =    06 = abs value
+20 = sqrt  X0,Y0 = variables</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1951–1953</td>
+      <td>Speedcoding</td>
+      <td class="designers">John Backus (IBM 701)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>Virtual floating-point calculator on IBM 701. Included sin, arctan, log, sqrt. Programs taking 2 weeks in machine code done in hours.
+        <span class="key-pill">Auto-increment address registers</span>
+      </td>
+      <td>
+<pre><span class="cm">; Pseudoinstruction set example</span>
+<span class="cm">; (conceptual — no standard syntax)</span>
+LOAD  R1, X
+SQRT  R1         <span class="cm">; sqrt(X)</span>
+STORE R1, RESULT
+<span class="cm">; ~700 words usable memory
+; add took 4.2 ms</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1951–1953</td>
+      <td>A-0 / A-2</td>
+      <td class="designers">Grace Hopper (UNIVAC)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>First "compiling" systems — expanded pseudocode into machine-code subprograms, like macros.
+        <span class="key-pill">Macro expansion</span>
+      </td>
+      <td>
+<pre><span class="cm">; A-0 pseudocode (conceptual)</span>
+<span class="cm">; short numeric codes triggered</span>
+<span class="cm">; machine-code subprograms</span>
+
+<span class="num">23</span> <span class="num">17</span> <span class="num">04</span>  <span class="cm">; call subprogram 23</span>
+                  <span class="cm">; with args 17, 04</span></pre>
+      </td>
+    </tr>
+
+    <!-- ── COMPILED HIGH-LEVEL ── -->
+    <tr class="era-header"><td colspan="6">▸ First Compiled High-Level Languages (1954–1960)</td></tr>
+
+    <tr>
+      <td>1954–1957</td>
+      <td>Fortran I/II</td>
+      <td class="designers">John Backus et al. (IBM 704)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>First widely accepted compiled language. All types fixed at compile time; no recursion.
+        <span class="key-pill">DO loop</span>
+        <span class="key-pill">IF statement</span>
+        <span class="key-pill">Implicit typing (I–N = integer)</span>
+        <span class="key-pill">Fortran II: independent subroutine compilation</span>
+      </td>
+      <td>
+<pre><span class="cm">! Fortran 95 example</span>
+<span class="kw">Implicit none</span>
+<span class="kw">Integer</span> <span class="kw">Dimension</span>(<span class="num">99</span>) :: Int_List
+<span class="kw">Integer</span> :: Sum, Average
+
+Sum = <span class="num">0</span>
+<span class="kw">Do</span> Counter = <span class="num">1</span>, List_Len
+  <span class="kw">Read</span> *, Int_List(Counter)
+  Sum = Sum + Int_List(Counter)
+<span class="kw">End Do</span>
+Average = Sum / List_Len
+<span class="kw">Print</span> *, <span class="str">'Average:'</span>, Average</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1958–1960</td>
+      <td>Lisp</td>
+      <td class="designers">John McCarthy, MIT AI Project</td>
+      <td><span class="tag tag-ai">AI / Functional</span></td>
+      <td>First functional language. Code and data share the same form (parenthesized lists).
+        <span class="key-pill">Atoms &amp; Lists</span>
+        <span class="key-pill">Recursion</span>
+        <span class="key-pill">Garbage collection</span>
+        <span class="key-pill">Conditional expressions</span>
+      </td>
+      <td>
+<pre><span class="cm">; Check if two lists are equal</span>
+(<span class="kw">DEFUN</span> <span class="fn">equal_lists</span> (lis1 lis2)
+  (<span class="kw">COND</span>
+    ((<span class="fn">ATOM</span> lis1) (<span class="fn">EQ</span> lis1 lis2))
+    ((<span class="fn">ATOM</span> lis2) <span class="kw">NIL</span>)
+    ((<span class="fn">equal_lists</span>
+       (<span class="fn">CAR</span> lis1) (<span class="fn">CAR</span> lis2))
+     (<span class="fn">equal_lists</span>
+       (<span class="fn">CDR</span> lis1) (<span class="fn">CDR</span> lis2)))
+    (T <span class="kw">NIL</span>)))</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>mid-1970s</td>
+      <td>Scheme</td>
+      <td class="designers">MIT</td>
+      <td><span class="tag tag-ai">Functional</span></td>
+      <td>Small, clean Lisp dialect. Static scoping only. First-class functions.
+        <span class="key-pill">Lexical scoping</span>
+        <span class="key-pill">Functions as first-class values</span>
+      </td>
+      <td>
+<pre><span class="cm">; Recursive factorial</span>
+(<span class="kw">define</span> (<span class="fn">factorial</span> n)
+  (<span class="kw">if</span> (<span class="op">=</span> n <span class="num">0</span>)
+      <span class="num">1</span>
+      (<span class="op">*</span> n (<span class="fn">factorial</span> (<span class="op">-</span> n <span class="num">1</span>)))))
+
+(<span class="fn">factorial</span> <span class="num">5</span>)  <span class="cm">; => 120</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1958–1960</td>
+      <td>ALGOL 60</td>
+      <td class="designers">Joint ACM (USA) + GAMM (Europe)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>First internationally designed &amp; formally described (BNF) language. Never widely adopted in USA (no I/O, IBM backed Fortran).
+        <span class="key-pill">Block structure &amp; scoping</span>
+        <span class="key-pill">Pass-by-value &amp; pass-by-name</span>
+        <span class="key-pill">Recursive procedures</span>
+        <span class="key-pill">Stack-dynamic arrays</span>
+      </td>
+      <td>
+<pre><span class="kw">begin</span>
+  <span class="kw">integer array</span> intlist [<span class="num">1</span>:<span class="num">99</span>];
+  <span class="kw">integer</span> sum, average;
+  sum := <span class="num">0</span>;
+  <span class="kw">for</span> counter := <span class="num">1</span> <span class="kw">step</span> <span class="num">1</span>
+      <span class="kw">until</span> listlen <span class="kw">do</span>
+  <span class="kw">begin</span>
+    readint(intlist[counter]);
+    sum := sum + intlist[counter]
+  <span class="kw">end</span>;
+  average := sum / listlen
+<span class="kw">end</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1959–1960</td>
+      <td>COBOL</td>
+      <td class="designers">Short Range Committee / DoD (based on FLOW-MATIC by Grace Hopper)</td>
+      <td><span class="tag tag-biz">Business</span></td>
+      <td>First major business language. DoD-mandated. ~800M lines still active (late 1990s).
+        <span class="key-pill">Hierarchical records (first)</span>
+        <span class="key-pill">Long identifiers (30 chars)</span>
+        <span class="key-pill">English-like syntax</span>
+        <span class="key-pill">Separate DATA / PROCEDURE divisions</span>
+      </td>
+      <td>
+<pre>IDENTIFICATION DIVISION.
+PROGRAM-ID. EXAMPLE.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+  <span class="num">01</span> TOTAL  <span class="kw">PICTURE IS</span> <span class="num">9(5)</span>.
+  <span class="num">01</span> COUNTER <span class="kw">PICTURE IS</span> <span class="num">9(3)</span>.
+PROCEDURE DIVISION.
+  MOVE <span class="num">0</span> TO TOTAL
+  <span class="kw">PERFORM</span> ADD-LOOP
+      UNTIL COUNTER <span class="op">&gt;</span> <span class="num">10</span>
+  STOP RUN.
+ADD-LOOP.
+  ADD COUNTER TO TOTAL
+  ADD <span class="num">1</span> TO COUNTER.</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1963–1964</td>
+      <td>Basic</td>
+      <td class="designers">John Kemeny &amp; Thomas Kurtz (Dartmouth)</td>
+      <td><span class="tag tag-sci">Education</span></td>
+      <td>First widely used timesharing language. First program ran 4:00 a.m., May 1, 1964. Resurgent via Visual Basic (1991).
+        <span class="key-pill">Terminal-based access</span>
+        <span class="key-pill">Beginners friendly</span>
+        <span class="key-pill">14 statement types</span>
+      </td>
+      <td>
+<pre><span class="kw">DIM</span> intlist(<span class="num">99</span>)
+result = <span class="num">0</span> : sum = <span class="num">0</span>
+<span class="kw">INPUT</span> listlen
+<span class="kw">FOR</span> counter = <span class="num">1</span> <span class="kw">TO</span> listlen
+  <span class="kw">INPUT</span> intlist(counter)
+  sum = sum + intlist(counter)
+<span class="kw">NEXT</span> counter
+average = sum / listlen
+<span class="kw">FOR</span> counter = <span class="num">1</span> <span class="kw">TO</span> listlen
+  <span class="kw">IF</span> intlist(counter) <span class="op">&gt;</span> average
+    <span class="kw">THEN</span> result = result + <span class="num">1</span>
+<span class="kw">NEXT</span> counter
+<span class="kw">PRINT</span> <span class="str">"Values &gt; avg:"</span>; result</pre>
+      </td>
+    </tr>
+
+    <!-- ── AMBITIOUS DESIGNS ── -->
+    <tr class="era-header"><td colspan="6">▸ Ambitious Designs &amp; Data Abstraction (1963–1973)</td></tr>
+
+    <tr>
+      <td>1963–1966</td>
+      <td>PL/I</td>
+      <td class="designers">IBM + SHARE (3×3 Committee)</td>
+      <td><span class="tag tag-sci">Scientific</span><span class="tag tag-biz">Business</span><span class="tag tag-sys">Systems</span></td>
+      <td>First universal language — meant to replace Fortran, COBOL, Lisp, and assembly. Criticized by Dijkstra for "baroqueness."
+        <span class="key-pill">Concurrency (first)</span>
+        <span class="key-pill">Exception handling (23 types, first)</span>
+        <span class="key-pill">Pointers as data type (first)</span>
+        <span class="key-pill">Array cross-sections</span>
+      </td>
+      <td>
+<pre>PLIEX: <span class="kw">PROCEDURE OPTIONS</span>(MAIN);
+  <span class="kw">DECLARE</span> INTLIST(<span class="num">1</span>:<span class="num">99</span>) FIXED;
+  <span class="kw">DECLARE</span> (SUM, AVG) FIXED;
+  SUM = <span class="num">0</span>;
+  <span class="kw">GET LIST</span>(LISTLEN);
+  <span class="kw">DO</span> I = <span class="num">1</span> <span class="kw">TO</span> LISTLEN;
+    <span class="kw">GET LIST</span>(INTLIST(I));
+    SUM = SUM + INTLIST(I);
+  <span class="kw">END</span>;
+  AVG = SUM / LISTLEN;
+  <span class="kw">PUT LIST</span>(<span class="str">'Average:'</span>, AVG);
+<span class="kw">END</span> PLIEX;</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>~1960</td>
+      <td>APL</td>
+      <td class="designers">Kenneth Iverson (IBM)</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>Originally a notation for describing computer architecture. Extremely terse — considered "throw-away" language.
+        <span class="key-pill">Rich array operators (single symbol)</span>
+        <span class="key-pill">Dynamic typing</span>
+        <span class="key-pill">Dynamic storage</span>
+      </td>
+      <td>
+<pre><span class="cm">⍝ APL: sum of array A</span>
++/A
+
+<span class="cm">⍝ Transpose of matrix M</span>
+⍉M
+
+<span class="cm">⍝ Average of A</span>
+(+/A) ÷ ⍴A
+
+<span class="cm">⍝ Each symbol is a rich
+⍝ operator — special charset
+⍝ required (APL print balls)</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>early 1960s</td>
+      <td>SNOBOL</td>
+      <td class="designers">Farber, Griswold, Polonsky (Bell Labs)</td>
+      <td><span class="tag tag-ai">Text Processing</span></td>
+      <td>Designed for text/string processing. Heart is string pattern matching.
+        <span class="key-pill">String pattern matching</span>
+        <span class="key-pill">Dynamic typing</span>
+        <span class="key-pill">Dynamic storage</span>
+      </td>
+      <td>
+<pre><span class="cm">* SNOBOL: find "CAT" in text</span>
+TEXT = <span class="str">'THE CAT SAT'</span>
+TEXT <span class="str">'CAT'</span>   :S(FOUND)F(NOTFOUND)
+FOUND
+  OUTPUT = <span class="str">'Pattern found'</span>  :(END)
+NOTFOUND
+  OUTPUT = <span class="str">'Not found'</span>
+END</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1962–1967</td>
+      <td>SIMULA 67</td>
+      <td class="designers">Nygaard &amp; Dahl (Norway)</td>
+      <td><span class="tag tag-oo">OOP Pioneer</span></td>
+      <td>Extended ALGOL 60. Introduced the <strong>class</strong> to support coroutines for simulation. Foundation of data abstraction and OOP.
+        <span class="key-pill">Class construct (first)</span>
+        <span class="key-pill">Data abstraction</span>
+        <span class="key-pill">Coroutines</span>
+      </td>
+      <td>
+<pre><span class="kw">Class</span> <span class="fn">Vehicle</span>(speed, fuel);
+  <span class="kw">Integer</span> speed; <span class="kw">Real</span> fuel;
+<span class="kw">Begin</span>
+  <span class="kw">Procedure</span> <span class="fn">Move</span>;
+  <span class="kw">Begin</span>
+    fuel := fuel - <span class="num">0.1</span> * speed
+  <span class="kw">End</span>;
+<span class="kw">End</span> Vehicle;
+
+<span class="kw">Ref</span>(Vehicle) v;
+v :- <span class="kw">New</span> Vehicle(<span class="num">60</span>, <span class="num">50.0</span>);
+v.<span class="fn">Move</span>;</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1968–1969</td>
+      <td>ALGOL 68</td>
+      <td class="designers">van Wijngaarden et al.</td>
+      <td><span class="tag tag-sci">Scientific</span></td>
+      <td>Based on <strong>orthogonality</strong> — few primitive types + unrestricted combining rules. Described using van Wijngaarden grammars (too complex for wide adoption).
+        <span class="key-pill">User-defined data types (first)</span>
+        <span class="key-pill">Flex arrays (implicit heap-dynamic)</span>
+      </td>
+      <td>
+<pre><span class="cm"># ALGOL 68</span>
+<span class="kw">mode</span> point = <span class="kw">struct</span>(
+  <span class="kw">real</span> x, y);
+
+point p = (x: <span class="num">1.0</span>, y: <span class="num">2.0</span>);
+
+<span class="kw">flex</span> [<span class="num">0</span>] <span class="kw">int</span> arr; <span class="cm"># dynamic array</span>
+arr := (<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>);
+<span class="kw">print</span>(arr[<span class="num">1</span>])</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>early 1970s</td>
+      <td>Prolog</td>
+      <td class="designers">Colmerauer &amp; Roussel (Aix-Marseille); Kowalski (Edinburgh)</td>
+      <td><span class="tag tag-logic">Logic</span></td>
+      <td>Programming Based on Logic. Uses predicate calculus + resolution. First interpreter 1972, Marseille.
+        <span class="key-pill">Facts &amp; Rules</span>
+        <span class="key-pill">Goal-based queries</span>
+        <span class="key-pill">Non-procedural</span>
+      </td>
+      <td>
+<pre><span class="cm">% Facts</span>
+mother(joanne, jake).
+father(vern, joanne).
+
+<span class="cm">% Rule</span>
+grandparent(X, Z) :-
+    parent(X, Y),
+    parent(Y, Z).
+
+<span class="cm">% Query</span>
+?- father(vern, joanne).
+<span class="cm">% => true</span>
+?- grandparent(vern, jake).
+<span class="cm">% => true</span></pre>
+      </td>
+    </tr>
+
+    <!-- ── STRUCTURED / SYSTEMS ── -->
+    <tr class="era-header"><td colspan="6">▸ Structured Programming &amp; Systems Languages (1971–1983)</td></tr>
+
+    <tr>
+      <td>1971</td>
+      <td>Pascal</td>
+      <td class="designers">Niklaus Wirth (ETH Zurich)</td>
+      <td><span class="tag tag-sci">Education</span></td>
+      <td>Designed for teaching structured programming. Dominant teaching language 1975–1995. Lacked variable-length array params and separate compilation.
+        <span class="key-pill">User-defined types (from ALGOL 68)</span>
+        <span class="key-pill">Case statement (from ALGOL-W)</span>
+        <span class="key-pill">Records</span>
+      </td>
+      <td>
+<pre><span class="kw">program</span> Example (<span class="kw">input</span>, <span class="kw">output</span>);
+<span class="kw">var</span>
+  sum, average, result: <span class="kw">integer</span>;
+  intlist: <span class="kw">array</span> [<span class="num">1</span>..<span class="num">99</span>] <span class="kw">of integer</span>;
+<span class="kw">begin</span>
+  sum := <span class="num">0</span>;
+  <span class="kw">for</span> counter := <span class="num">1</span> <span class="kw">to</span> listlen <span class="kw">do</span>
+  <span class="kw">begin</span>
+    readln(intlist[counter]);
+    sum := sum + intlist[counter]
+  <span class="kw">end</span>;
+  average := sum <span class="kw">div</span> listlen;
+  writeln(<span class="str">'Average:'</span>, average)
+<span class="kw">end</span>.</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1972</td>
+      <td>C</td>
+      <td class="designers">Dennis Ritchie (Bell Labs)</td>
+      <td><span class="tag tag-sys">Systems</span></td>
+      <td>Built for UNIX. Influenced by ALGOL 68 (for, switch, assignment operators, pointers). Standardized C89, then C99.
+        <span class="key-pill">Rich operator set</span>
+        <span class="key-pill">Minimal type checking (flexible/unsafe)</span>
+        <span class="key-pill">Pointers</span>
+      </td>
+      <td>
+<pre><span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">int</span> intlist[<span class="num">99</span>], sum=<span class="num">0</span>,
+      average, result=<span class="num">0</span>;
+  scanf(<span class="str">"%d"</span>, &amp;listlen);
+  <span class="kw">for</span> (i=<span class="num">0</span>; i&lt;listlen; i++) {
+    scanf(<span class="str">"%d"</span>, &amp;intlist[i]);
+    sum += intlist[i];
+  }
+  average = sum / listlen;
+  <span class="kw">for</span> (i=<span class="num">0</span>; i&lt;listlen; i++)
+    <span class="kw">if</span> (intlist[i] &gt; average)
+      result++;
+  printf(<span class="str">"%d\n"</span>, result);
+}</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1974–1983</td>
+      <td>Ada 83</td>
+      <td class="designers">Jean Ichbiah / Cii Honeywell-Bull (DoD)</td>
+      <td><span class="tag tag-sys">Embedded / DoD</span></td>
+      <td>History's largest language design effort. Named after Augusta Ada Byron (1815–1851), world's first programmer.
+        <span class="key-pill">Packages (data abstraction)</span>
+        <span class="key-pill">Exception handling</span>
+        <span class="key-pill">Generic units</span>
+        <span class="key-pill">Tasks + Rendezvous (concurrency)</span>
+      </td>
+      <td>
+<pre><span class="kw">procedure</span> <span class="fn">Ada_Ex</span> <span class="kw">is</span>
+  <span class="kw">type</span> Int_List_Type <span class="kw">is</span>
+    <span class="kw">array</span> (<span class="num">1</span>..<span class="num">99</span>) <span class="kw">of</span> Integer;
+  Int_List : Int_List_Type;
+  Sum, Average : Integer;
+<span class="kw">begin</span>
+  Sum := <span class="num">0</span>;
+  <span class="kw">for</span> I <span class="kw">in</span> <span class="num">1</span>..List_Len <span class="kw">loop</span>
+    Get(Int_List(I));
+    Sum := Sum + Int_List(I);
+  <span class="kw">end loop</span>;
+  Average := Sum / List_Len;
+  Put(<span class="str">"Average:"</span>); Put(Average);
+<span class="kw">end</span> Ada_Ex;</pre>
+      </td>
+    </tr>
+
+    <!-- ── OOP ERA ── -->
+    <tr class="era-header"><td colspan="6">▸ Object-Oriented Languages (1972–2002)</td></tr>
+
+    <tr>
+      <td>1972–1980</td>
+      <td>Smalltalk-80</td>
+      <td class="designers">Alan Kay et al. (Xerox PARC)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span></td>
+      <td>First language to fully support OOP. Pioneered windowing / GUI systems. Everything is an object; all operations are message sends.
+        <span class="key-pill">Pure OOP</span>
+        <span class="key-pill">Message passing</span>
+        <span class="key-pill">Classes &amp; inheritance</span>
+      </td>
+      <td>
+<pre><span class="str">"Smalltalk class definition"</span>
+<span class="kw">class name</span> Polygon
+<span class="kw">superclass</span> Object
+<span class="kw">instance variable names</span>
+  ourPen numSides sideLength
+
+<span class="cm">"Draw the polygon"</span>
+draw
+  numSides <span class="kw">timesRepeat</span>: [
+    ourPen <span class="fn">go</span>: sideLength;
+    <span class="fn">turn</span>: <span class="num">360</span> // numSides]
+
+sides: num
+  numSides &lt;- num</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1980–1985</td>
+      <td>C++</td>
+      <td class="designers">Bjarne Stroustrup (Bell Labs)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span><span class="tag tag-sys">Systems</span></td>
+      <td>C + OOP features from SIMULA 67. Evolved: C with Classes → C++ → R2.0 → R3.0. Inherited C's insecurities.
+        <span class="key-pill">Classes &amp; inheritance</span>
+        <span class="key-pill">Virtual methods</span>
+        <span class="key-pill">Operator overloading</span>
+        <span class="key-pill">Templates</span>
+        <span class="key-pill">Multiple inheritance</span>
+      </td>
+      <td>
+<pre><span class="kw">class</span> <span class="fn">Animal</span> {
+<span class="kw">public</span>:
+  <span class="kw">virtual</span> <span class="kw">void</span> <span class="fn">speak</span>() {
+    cout &lt;&lt; <span class="str">"..."</span>;
+  }
+};
+<span class="kw">class</span> <span class="fn">Dog</span> : <span class="kw">public</span> Animal {
+<span class="kw">public</span>:
+  <span class="kw">void</span> <span class="fn">speak</span>() <span class="kw">override</span> {
+    cout &lt;&lt; <span class="str">"Woof!"</span>;
+  }
+};
+Animal* a = <span class="kw">new</span> Dog();
+a-&gt;<span class="fn">speak</span>(); <span class="cm">// "Woof!" (dynamic)</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1990–1995</td>
+      <td>Java</td>
+      <td class="designers">James Gosling et al. (Sun Microsystems)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span><span class="tag tag-web">Web</span></td>
+      <td>Started for embedded consumer electronics; pivoted to Web (applets) 1993. Simpler, safer C++; OOP-only.
+        <span class="key-pill">Garbage collection</span>
+        <span class="key-pill">No pointers</span>
+        <span class="key-pill">Array index checking</span>
+        <span class="key-pill">Single inheritance + interfaces</span>
+        <span class="key-pill">JVM + JIT</span>
+      </td>
+      <td>
+<pre><span class="kw">class</span> <span class="fn">Example</span> {
+  <span class="kw">public static void</span> <span class="fn">main</span>(
+      String[] args) {
+    <span class="kw">int</span>[] list = <span class="kw">new int</span>[<span class="num">99</span>];
+    <span class="kw">int</span> sum = <span class="num">0</span>, avg, result = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> x : list) sum += x;
+    avg = sum / list.length;
+    <span class="kw">for</span> (<span class="kw">int</span> x : list)
+      <span class="kw">if</span> (x &gt; avg) result++;
+    System.out.<span class="fn">println</span>(result);
+  }
+}</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>2000 (rel. 2002)</td>
+      <td>C#</td>
+      <td class="designers">Anders Hejlsberg (Microsoft)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span><span class="tag tag-sys">Component</span></td>
+      <td>Based on C++, Java, Delphi, VB. .NET flagship. Compiles to IL; JIT compiled (never interpreted).
+        <span class="key-pill">Delegates (type-safe fn pointers)</span>
+        <span class="key-pill">Properties (get/set)</span>
+        <span class="key-pill">Rectangular arrays</span>
+        <span class="key-pill">foreach</span>
+        <span class="key-pill">Implicit boxing/unboxing</span>
+      </td>
+      <td>
+<pre><span class="kw">public class</span> <span class="fn">Example</span> {
+  <span class="kw">static void</span> <span class="fn">Main</span>() {
+    <span class="kw">int</span>[] intList = <span class="kw">new int</span>[<span class="num">99</span>];
+    <span class="kw">int</span> sum = <span class="num">0</span>, avg, result = <span class="num">0</span>;
+    <span class="kw">foreach</span> (<span class="kw">int</span> n <span class="kw">in</span> intList)
+      sum += n;
+    avg = sum / intList.Length;
+    <span class="kw">foreach</span> (<span class="kw">int</span> n <span class="kw">in</span> intList)
+      <span class="kw">if</span> (n &gt; avg) result++;
+    Console.<span class="fn">WriteLine</span>(result);
+  }
+}</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>2010 (pub. 2014)</td>
+      <td>Swift</td>
+      <td class="designers">Chris Lattner (Apple)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span><span class="tag tag-sys">Systems</span></td>
+      <td>Replacement for Objective-C on Apple platforms. Open source from v2 (2015).
+        <span class="key-pill">Type inference</span>
+        <span class="key-pill">Optional types (?)</span>
+        <span class="key-pill">Protocols</span>
+        <span class="key-pill">No pointers</span>
+        <span class="key-pill">Safer switch (no fall-through)</span>
+      </td>
+      <td>
+<pre><span class="kw">var</span> numbers = [<span class="num">3</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>]
+<span class="kw">let</span> avg = numbers.<span class="fn">reduce</span>(<span class="num">0</span>, +)
+             / numbers.count
+<span class="kw">let</span> result = numbers.<span class="fn">filter</span> {
+  $0 &gt; avg
+}.<span class="fn">count</span>
+<span class="fn">print</span>(result)
+
+<span class="cm">// No semicolons needed
+// Type inferred automatically</span></pre>
+      </td>
+    </tr>
+
+    <!-- ── SCRIPTING / FUNCTIONAL ── -->
+    <tr class="era-header"><td colspan="6">▸ Scripting &amp; Functional Languages (1980s–2000s)</td></tr>
+
+    <tr>
+      <td>1980s</td>
+      <td>ML / Haskell / F#</td>
+      <td class="designers">Milner (ML); Hudak &amp; Fasel (Haskell); Microsoft (F#)</td>
+      <td><span class="tag tag-ml">Functional</span></td>
+      <td>
+        <span class="key-pill">ML: static type inference, types on objects</span>
+        <span class="key-pill">Haskell: purely functional, lazy evaluation</span>
+        <span class="key-pill">F#: .NET + functional + OOP</span>
+      </td>
+      <td>
+<pre><span class="cm">(* ML: factorial *)</span>
+<span class="kw">fun</span> <span class="fn">fact</span> <span class="num">0</span> = <span class="num">1</span>
+  | <span class="fn">fact</span> n = n * <span class="fn">fact</span>(n-<span class="num">1</span>);
+
+<span class="cm">-- Haskell: infinite list (lazy)</span>
+nats = [<span class="num">1</span>..]
+first10 = <span class="fn">take</span> <span class="num">10</span> nats
+<span class="cm">-- [1,2,3,4,5,6,7,8,9,10]</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1987</td>
+      <td>Perl</td>
+      <td class="designers">Larry Wall (sh + awk fusion)</td>
+      <td><span class="tag tag-script">Scripting</span><span class="tag tag-sys">Unix</span></td>
+      <td>Always compiled (at minimum to intermediate form). Powerful but dangerous — missing type checks.
+        <span class="key-pill">$ @ % namespace sigils</span>
+        <span class="key-pill">Dynamic-length sparse arrays</span>
+        <span class="key-pill">Associative arrays (hashes)</span>
+      </td>
+      <td>
+<pre><span class="cm"># Perl</span>
+($sum, $result) = (<span class="num">0</span>, <span class="num">0</span>);
+$listlen = &lt;STDIN&gt;;
+<span class="kw">for</span> ($i=<span class="num">0</span>; $i&lt;$listlen; $i++) {
+  $intlist[$i] = &lt;STDIN&gt;;
+  $sum += $intlist[$i];
+}
+$avg = $sum / $listlen;
+<span class="kw">foreach</span> $n (@intlist) {
+  <span class="kw">if</span> ($n &gt; $avg) { $result++; }
+}
+<span class="kw">print</span> <span class="str">"Result: $result\n"</span>;</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1994–1995</td>
+      <td>PHP</td>
+      <td class="designers">Rasmus Lerdorf (Apache)</td>
+      <td><span class="tag tag-web">Web / Server-side</span></td>
+      <td>HTML-embedded server-side scripting. Browser never sees PHP code. PHP 7 released 2015.
+        <span class="key-pill">Dynamic typing</span>
+        <span class="key-pill">Arrays = JS arrays + Perl hashes</span>
+        <span class="key-pill">Database support</span>
+      </td>
+      <td>
+<pre><span class="cm">&lt;?php</span>
+$nums = [<span class="num">4</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>, <span class="num">5</span>];
+$avg = <span class="fn">array_sum</span>($nums)
+       / <span class="fn">count</span>($nums);
+$result = <span class="num">0</span>;
+<span class="kw">foreach</span> ($nums <span class="kw">as</span> $n) {
+  <span class="kw">if</span> ($n &gt; $avg) $result++;
+}
+<span class="kw">echo</span> <span class="str">"Above avg: $result"</span>;
+<span class="cm">?&gt;</span></pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>1995</td>
+      <td>JavaScript</td>
+      <td class="designers">Brendan Eich (Netscape → joint w/ Sun)</td>
+      <td><span class="tag tag-web">Web / Client-side</span></td>
+      <td>Mocha → LiveScript → JavaScript. Standardized as ECMAScript. NOT related to Java despite name — no inheritance or dynamic binding.
+        <span class="key-pill">Dynamic typing</span>
+        <span class="key-pill">Dynamic-length strings &amp; arrays</span>
+        <span class="key-pill">DOM manipulation</span>
+      </td>
+      <td>
+<pre><span class="cm">// JavaScript</span>
+<span class="kw">var</span> nums = [<span class="num">4</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>];
+<span class="kw">var</span> sum = <span class="num">0</span>, result = <span class="num">0</span>;
+nums.<span class="fn">forEach</span>(n => sum += n);
+<span class="kw">var</span> avg = sum / nums.length;
+nums.<span class="fn">forEach</span>(n => {
+  <span class="kw">if</span> (n > avg) result++;
+});
+document.<span class="fn">write</span>(result);</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>early 1990s</td>
+      <td>Python</td>
+      <td class="designers">Guido van Rossum (Netherlands)</td>
+      <td><span class="tag tag-script">Scripting</span><span class="tag tag-oo">Object-Oriented</span></td>
+      <td>Interpreted OOP scripting. Open-source. Easily extensible with compiled modules.
+        <span class="key-pill">Lists, Tuples, Dictionaries</span>
+        <span class="key-pill">List comprehensions (from Haskell)</span>
+        <span class="key-pill">Garbage collection</span>
+        <span class="key-pill">Dynamic typing</span>
+      </td>
+      <td>
+<pre><span class="cm"># Python</span>
+nums = [<span class="num">4</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>, <span class="num">5</span>]
+avg = <span class="fn">sum</span>(nums) / <span class="fn">len</span>(nums)
+
+<span class="cm"># List comprehension</span>
+above = [x <span class="kw">for</span> x <span class="kw">in</span> nums
+         <span class="kw">if</span> x > avg]
+
+<span class="fn">print</span>(<span class="fn">len</span>(above))
+
+<span class="cm"># Tuple (immutable list)</span>
+point = (<span class="num">3.0</span>, <span class="num">4.0</span>)</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>early 1990s (rel. 1996)</td>
+      <td>Ruby</td>
+      <td class="designers">Yukihiro Matsumoto "Matz" (Japan)</td>
+      <td><span class="tag tag-oo">Object-Oriented</span><span class="tag tag-script">Scripting</span></td>
+      <td>Pure OOP like Smalltalk — every value is an object; operators are methods. First Japanese-designed language with wide US use.
+        <span class="key-pill">Operators are methods (redefinable)</span>
+        <span class="key-pill">Dynamic classes</span>
+        <span class="key-pill">Scope via name conventions (@ $)</span>
+      </td>
+      <td>
+<pre><span class="cm"># Ruby</span>
+nums = [<span class="num">4</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>]
+avg = nums.<span class="fn">sum</span>.to_f / nums.<span class="fn">size</span>
+result = nums.<span class="fn">count</span> { |n| n > avg }
+<span class="fn">puts</span> result
+
+<span class="cm"># Everything is an object:</span>
+<span class="fn">puts</span> <span class="num">42</span>.<span class="fn">class</span>    <span class="cm"># => Integer</span>
+<span class="fn">puts</span> <span class="str">"hi"</span>.<span class="fn">upcase</span> <span class="cm"># => HI</span></pre>
+      </td>
+    </tr>
+
+    <!-- ── MARKUP HYBRIDS ── -->
+    <tr class="era-header"><td colspan="6">▸ Markup-Programming Hybrid Languages (late 1990s)</td></tr>
+
+    <tr>
+      <td>late 1990s</td>
+      <td>XSLT</td>
+      <td class="designers">W3C</td>
+      <td><span class="tag tag-web">Web / XML</span></td>
+      <td>Transforms XML → HTML (or other XML). Templates match data patterns. Input: XML data + XSLT doc. Output: transformed XML/HTML.
+        <span class="key-pill">Template-based transformation</span>
+        <span class="key-pill">for-each, sort constructs</span>
+      </td>
+      <td>
+<pre><span class="cm">&lt;!-- XSLT template --&gt;</span>
+&lt;<span class="kw">xsl:template</span> match=<span class="str">"book"</span>&gt;
+  &lt;tr&gt;
+    &lt;td&gt;
+      &lt;<span class="kw">xsl:value-of</span>
+        select=<span class="str">"title"</span>/&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/<span class="kw">xsl:template</span>&gt;
+
+&lt;<span class="kw">xsl:for-each</span>
+  select=<span class="str">"catalog/book"</span>&gt;
+&lt;/<span class="kw">xsl:for-each</span>&gt;</pre>
+      </td>
+    </tr>
+
+    <tr>
+      <td>late 1990s</td>
+      <td>JSP / JSTL</td>
+      <td class="designers">Sun Microsystems</td>
+      <td><span class="tag tag-web">Web / Server-side</span></td>
+      <td>Java Server Pages: mix of HTML + Java. JSP processor converts page to a servlet run on the server. JSTL if ≈ C preprocessor #if.
+        <span class="key-pill">Servlets</span>
+        <span class="key-pill">JSTL tags (if, choose, forEach)</span>
+      </td>
+      <td>
+<pre><span class="cm">&lt;!-- JSP / JSTL example --&gt;</span>
+&lt;<span class="kw">c:if</span> test=<span class="str">"${score &gt; 60}"</span>&gt;
+  &lt;p&gt;You passed!&lt;/p&gt;
+&lt;/<span class="kw">c:if</span>&gt;
+
+&lt;<span class="kw">c:forEach</span>
+  var=<span class="str">"item"</span>
+  items=<span class="str">"${itemList}"</span>&gt;
+  &lt;p&gt;${item.name}&lt;/p&gt;
+&lt;/<span class="kw">c:forEach</span>&gt;</pre>
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<p class="footnote">Source: <em>Concepts of Programming Languages</em>, Chapter 2 — Evolution of the Major Programming Languages</p>
+
+</body>
+</html>
